@@ -12,7 +12,7 @@ fn main():
     let socket: PythonObject
     let server_socket: PythonObject
 
-    print("Starting firedis 🔥 on host:", host, "port:", port, "...")
+    print("Starting firedis on host:", host, "and port", port, "🔥")
 
     try:
         Python.add_to_path(".")
