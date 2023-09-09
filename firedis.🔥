@@ -1,0 +1,26 @@
+from python.python import (
+    Python,
+    PythonObject,
+)
+
+
+fn main():
+    let host: StringRef = "localhost"
+    let port: Int = 6379
+    let reuse_port: Bool = True
+
+    let socket: PythonObject
+    let server_socket: PythonObject
+
+    print("Starting firedis 🔥 on host:", host, "port:", port, "...")
+
+    try:
+        Python.add_to_path(".")
+        let firedis_py = Python.import_module("firedis")
+
+        server_socket = firedis_py.create_server(host, port, reuse_port)
+
+        _ = server_socket.accept()
+    except e:
+        print("err:", e.value)
+        print("\nsocket failed... exiting")
