@@ -1,7 +1,28 @@
-from python.python import (
-    Python,
-    PythonObject,
-)
+from python.python import Python
+from python.object import PythonObject
+from runtime.llcl import num_cores, Runtime
+
+
+fn handle_msg(client_socket: PythonObject, msg: PythonObject) -> None:
+    let pong = "+PONG\r\n"
+    print("> received:", msg)
+
+    try:
+        if msg == "PING\r\n":
+            _ = client_socket.send(PythonObject(pong).encode())
+    except e:
+        print("> err:", e.value)
+
+
+fn wait_forever(client_socket: PythonObject) -> None:
+    while True:
+        try:
+            let data = client_socket.recv(1024)
+
+            _ = handle_msg(client_socket, data)
+
+        except e:
+            print("> err:", e.value, "exiting...")
 
 
 fn main():
@@ -12,7 +33,7 @@ fn main():
     let socket: PythonObject
     let server_socket: PythonObject
 
-    print("Starting firedis on host:", host, "and port", port, "🔥")
+    print("> starting firedis on host:", host, "and port", port, "🔥")
 
     try:
         Python.add_to_path(".")
@@ -20,7 +41,14 @@ fn main():
 
         server_socket = firedis_py.create_server(host, port, reuse_port)
 
-        _ = server_socket.accept()
+        let socket_res = server_socket.accept()
+
+        let client_socket = socket_res[0]
+        let addr = socket_res[1]
+
+        print("> client connected:", addr)
+
+        wait_forever(client_socket)
+
     except e:
-        print("err:", e.value)
-        print("\nsocket failed... exiting")
+        print("> err:", e.value, "exiting...")
