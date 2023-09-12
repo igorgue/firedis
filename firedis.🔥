@@ -3,26 +3,55 @@ from python.object import PythonObject
 from runtime.llcl import num_cores, Runtime
 
 
-fn handle_msg(client_socket: PythonObject, msg: PythonObject) -> None:
+fn parse(msg: PythonObject) -> String:
+    try:
+        return msg.decode().split("\r\n")[-2].upper().to_string()
+    except e:
+        print("> [parse] err:", e.value)
+
+        return ""
+
+
+fn pong(socket: PythonObject) -> Bool:
     let pong = "+PONG\r\n"
-    print("> received:", msg)
 
     try:
-        if msg == "PING\r\n":
-            _ = client_socket.send(PythonObject(pong).encode())
+        _ = socket.send(PythonObject(pong).encode("utf-8"))
     except e:
-        print("> err:", e.value)
+        print("> [pong] err:", e.value)
+
+        return False
+
+    return True
 
 
-fn wait_forever(client_socket: PythonObject) -> None:
+fn handle_msg(socket: PythonObject, raw_msg: PythonObject) -> Bool:
+    print("> [handle_msg] raw msg:", raw_msg)
+
+    let msg = parse(raw_msg)
+
+    if msg == "COMMAND":
+        print("> [handle_msg]", msg, "sending PONG")
+        return pong(socket)
+    if msg == "PING":
+        print("> [handle_msg]", msg, "sending PONG")
+        return pong(socket)
+
+    print("> [handle_msg]", msg, "UNKNOWN message, exiting...")
+    return False
+
+
+fn wait_forever(socket: PythonObject) -> None:
     while True:
         try:
-            let data = client_socket.recv(1024)
+            let data = socket.recv(1024)
 
-            _ = handle_msg(client_socket, data)
-
+            if handle_msg(socket, data):
+                continue
+            else:
+                break
         except e:
-            print("> err:", e.value, "exiting...")
+            print("> [wait_forever] err:", e.value, "exiting...")
 
 
 fn main():
@@ -33,7 +62,7 @@ fn main():
     let socket: PythonObject
     let server_socket: PythonObject
 
-    print("> starting firedis on host:", host, "and port", port, "🔥")
+    print("> [main] starting firedis on host:", host, "and port", port, "🔥")
 
     try:
         Python.add_to_path(".")
@@ -41,14 +70,13 @@ fn main():
 
         server_socket = firedis_py.create_server(host, port, reuse_port)
 
-        let socket_res = server_socket.accept()
+        let accept = server_socket.accept()
 
-        let client_socket = socket_res[0]
-        let addr = socket_res[1]
+        let socket = accept[0]
+        let addr = accept[1]
 
-        print("> client connected:", addr)
+        print("> [main] client connected:", addr)
 
-        wait_forever(client_socket)
-
+        wait_forever(socket)
     except e:
-        print("> err:", e.value, "exiting...")
+        print("> [main] err:", e.value, "exiting...")
