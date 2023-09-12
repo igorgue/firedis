@@ -10,6 +10,10 @@ def create_server(
     return socket.create_server((host, port), reuse_port=reuse_port)
 
 
+def len_list(lst: list) -> int:
+    return len(lst)
+
+
 if __name__ == "__main__":
     host = "localhost"
     port = 6379

@@ -5,7 +5,15 @@ from runtime.llcl import num_cores, Runtime
 
 fn parse(msg: PythonObject) -> String:
     try:
-        return msg.decode().split("\r\n")[-2].upper().to_string()
+        let msg = msg.decode().split("\r\n")
+
+        Python.add_to_path(".")
+        let firedis_py = Python.import_module("firedis")
+
+        if firedis_py.len_list(msg) <= 1:
+            return ""
+
+        return msg[-2].upper().to_string()
     except e:
         print("> [parse] err:", e.value)
 
@@ -26,18 +34,13 @@ fn pong(socket: PythonObject) -> Bool:
 
 
 fn handle_msg(socket: PythonObject, raw_msg: PythonObject) -> Bool:
-    print("> [handle_msg] raw msg:", raw_msg)
-
     let msg = parse(raw_msg)
 
     if msg == "COMMAND":
-        print("> [handle_msg]", msg, "sending PONG")
         return pong(socket)
     if msg == "PING":
-        print("> [handle_msg]", msg, "sending PONG")
         return pong(socket)
 
-    print("> [handle_msg]", msg, "UNKNOWN message, exiting...")
     return False
 
 
