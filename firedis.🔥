@@ -74,32 +74,21 @@ fn main():
 
         firedis_py = Python.import_module("firedis")
         server_socket = firedis_py.create_server(host, port, reuse_port)
-    except e:
-        print("> [main] err:", e.value)
 
-    with Runtime() as rt:
         while True:
             print("> [main] waiting for client...")
+
             let socket: PythonObject
             let addr: PythonObject
             let accept: PythonObject
 
-            try:
-                accept = server_socket.accept()
+            accept = server_socket.accept()
 
-                socket = accept[0]
-                addr = accept[1]
+            socket = accept[0]
+            addr = accept[1]
 
-                print("> [main] client connected:", addr)
-            except e:
-                print("> [main] e", e.value)
+            print("> [main] client connected:", addr)
 
-            @parameter
-            fn worker(n: Int) -> None:
-                print("> [main] worker", n, "started")
-
-                handle_client(socket)
-
-                print("> [main] worker", n, "exiting")
-
-            parallelize[worker](rt, 4)
+            handle_client(socket)
+    except e:
+        print("> [main] err:", e.value)
