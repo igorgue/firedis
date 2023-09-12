@@ -1,5 +1,7 @@
 from python.python import Python
 from python.object import PythonObject
+from algorithm.functional import parallelize, num_cores
+from runtime.llcl import Runtime
 
 
 fn parse(msg: PythonObject) -> String:
@@ -57,6 +59,7 @@ fn handle_client(socket: PythonObject) -> None:
 
 
 fn main():
+    let firedis_py: PythonObject
     let host: StringRef = "localhost"
     let port: Int = 6379
     let reuse_port: Bool = True
@@ -68,20 +71,35 @@ fn main():
 
     try:
         Python.add_to_path(".")
-        let firedis_py = Python.import_module("firedis")
 
+        firedis_py = Python.import_module("firedis")
         server_socket = firedis_py.create_server(host, port, reuse_port)
+    except e:
+        print("> [main] err:", e.value)
 
-            while True:
-                print("> [main] waiting for client...")
+    with Runtime() as rt:
+        while True:
+            print("> [main] waiting for client...")
+            let socket: PythonObject
+            let addr: PythonObject
+            let accept: PythonObject
 
-                let accept = server_socket.accept()
+            try:
+                accept = server_socket.accept()
 
-                let socket = accept[0]
-                let addr = accept[1]
+                socket = accept[0]
+                addr = accept[1]
 
                 print("> [main] client connected:", addr)
+            except e:
+                print("> [main] e", e.value)
+
+            @parameter
+            fn worker(n: Int) -> None:
+                print("> [main] worker", n, "started")
 
                 handle_client(socket)
-    except e:
-        print("> [main] err:", e.value, "exiting...")
+
+                print("> [main] worker", n, "exiting")
+
+            parallelize[worker](rt, 4)
