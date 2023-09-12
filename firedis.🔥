@@ -7,9 +7,9 @@ fn parse(msg: PythonObject) -> String:
         let msg = msg.decode().split("\r\n")
 
         Python.add_to_path(".")
-        let firedis_py = Python.import_module("firedis")
+        let len_py = Python.import_module("builtins").len
 
-        if firedis_py.len_list(msg) <= 1:
+        if len_py(msg) <= 1:
             return ""
 
         return msg[-2].upper().to_string()

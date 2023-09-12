@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import socket
+import threading
 
 
 def create_server(
@@ -10,8 +11,11 @@ def create_server(
     return socket.create_server((host, port), reuse_port=reuse_port)
 
 
-def len_list(lst: list) -> int:
-    return len(lst)
+def new_thread(handle_client, client_socket, addr):
+    return threading.Thread(
+        target=handle_client,
+        args=(client_socket, addr),
+    )
 
 
 if __name__ == "__main__":
