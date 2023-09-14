@@ -46,10 +46,12 @@ fn handle_msg(socket: PythonObject, raw_msg: PythonObject) -> Bool:
 
 
 fn handle_client(socket: PythonObject) -> None:
+    print("> [handle_client] handling client...")
     while True:
         try:
             let data = socket.recv(1024)
 
+            print("> [handle_client] got data?...")
             if handle_msg(socket, data):
                 continue
             else:
@@ -75,6 +77,14 @@ fn main():
         firedis_py = Python.import_module("firedis")
         server_socket = firedis_py.create_server(host, port, reuse_port)
 
+        @parameter
+        fn handle_client_parallel(n: Int) -> None:
+            print("> [main] starting", n, "parallel clients...")
+
+            handle_client(server_socket)
+
+        let rt: Runtime = Runtime()
+
         while True:
             print("> [main] waiting for client...")
 
@@ -89,6 +99,6 @@ fn main():
 
             print("> [main] client connected:", addr)
 
-            handle_client(socket)
+            parallelize[handle_client_parallel](rt, 2)
     except e:
         print("> [main] err:", e.value)
