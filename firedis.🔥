@@ -1,108 +1,3 @@
-# from python.python import Python
-# from python.object import PythonObject
-# from algorithm.functional import parallelize, num_cores
-# from runtime.llcl import Runtime
-#
-#
-# fn parse(msg: PythonObject) -> String:
-#     try:
-#         let msg = msg.decode().split("\r\n")
-#
-#         Python.add_to_path(".")
-#         let len_py = Python.import_module("builtins").len
-#
-#         if len_py(msg) <= 1:
-#             return ""
-#
-#         return msg[-2].upper().to_string()
-#     except e:
-#         print("> [parse] err:", e.value)
-#
-#         return ""
-#
-#
-# fn pong(socket: PythonObject) -> Bool:
-#     let pong = "+PONG\r\n"
-#
-#     try:
-#         _ = socket.send(PythonObject(pong).encode("utf-8"))
-#     except e:
-#         print("> [pong] err:", e.value)
-#
-#         return False
-#
-#     return True
-#
-#
-# fn handle_msg(socket: PythonObject, raw_msg: PythonObject) -> Bool:
-#     let msg = parse(raw_msg)
-#
-#     if msg == "COMMAND":
-#         return pong(socket)
-#     if msg == "PING":
-#         return pong(socket)
-#
-#     return False
-#
-#
-# fn handle_client(socket: PythonObject) -> None:
-#     print("> [handle_client] handling client...")
-#     while True:
-#         try:
-#             let data = socket.recv(1024)
-#
-#             print("> [handle_client] got data?...")
-#             if handle_msg(socket, data):
-#                 continue
-#             else:
-#                 break
-#         except e:
-#             print("> [handle_client] err:", e.value, "exiting...")
-#
-#
-# fn main():
-#     let firedis_py: PythonObject
-#     let host: StringRef = "localhost"
-#     let port: Int = 6379
-#     let reuse_port: Bool = True
-#
-#     let socket: PythonObject
-#     let server_socket: PythonObject
-#
-#     print("> [main] starting firedis on host:", host, "and port", port, "🔥")
-#
-#     try:
-#         Python.add_to_path(".")
-#
-#         firedis_py = Python.import_module("firedis")
-#         server_socket = firedis_py.create_server(host, port, reuse_port)
-#
-#         @parameter
-#         fn handle_client_parallel(n: Int) -> None:
-#             print("> [main] starting", n, "parallel clients...")
-#
-#             handle_client(server_socket)
-#
-#         let rt: Runtime = Runtime()
-#
-#         while True:
-#             print("> [main] waiting for client...")
-#
-#             let socket: PythonObject
-#             let addr: PythonObject
-#             let accept: PythonObject
-#
-#             accept = server_socket.accept()
-#
-#             socket = accept[0]
-#             addr = accept[1]
-#
-#             print("> [main] client connected:", addr)
-#
-#             parallelize[handle_client_parallel](rt, 2)
-#     except e:
-#         print("> [main] err:", e.value)
-# libc imports.
 from libc import AF_INET, AF_INET6, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, SHUT_RDWR
 from libc import c_char, c_int, c_uint, c_void
 from libc import (
@@ -136,7 +31,7 @@ fn main():
     let conv_status = inet_pton(address_family, to_char_ptr(ip_addr), ip_buf)
     let raw_ip = ip_buf.bitcast[c_uint]().load()
 
-    _ = printf("inet_pton: %d :: status: %d\n", raw_ip, conv_status)
+    print("inet_pton:", raw_ip, "::", "status: ", conv_status)
 
     let bin_port = htons(UInt16(port))
     _ = printf("htons: %d\n", bin_port)
@@ -147,7 +42,7 @@ fn main():
     let sockfd = socket(address_family, SOCK_STREAM, 0)
     if sockfd == -1:
         print("Socket creation error")
-    _ = printf("sockfd: %d\n", sockfd)
+    # _ = printf("sockfd: %d\n", sockfd)
 
     var yes: Int = 1
     if (
@@ -168,14 +63,15 @@ fn main():
         print("Binding socket failed")
 
     if listen(sockfd, c_int(128)) == -1:
-        _ = printf("Listen %d failed.\n", sockfd)
+        print("listen")
+        # _ = printf("Listen %d failed.\n", sockfd)
 
-    _ = printf(
-        "server: started at %s : %d with fd %d – waiting for connections...\n",
-        ip_addr,
-        port,
-        sockfd,
-    )
+    # _ = printf(
+    #     "server: started at %s : %d with fd %d – waiting for connections...\n",
+    #     ip_addr,
+    #     port,
+    #     sockfd,
+    # )
 
     let their_addr_ptr = Pointer[sockaddr].alloc(1)
     var sin_size = socklen_t(sizeof[socklen_t]())
@@ -197,3 +93,6 @@ fn main():
     # close(new_fd)
     _ = shutdown(sockfd, SHUT_RDWR)
     # close(new_fd)
+
+
+# vim: ft=mojo

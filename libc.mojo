@@ -1256,11 +1256,7 @@ fn printf[*T: AnyType](format: StringLiteral, *args: *T) -> c_int:
         args: Arguments for the format string.
     Returns: A File Descriptor or -1 in case of failure
     """
-    return external_call[
-        "printf",
-        c_int,  # FnName, RetType
-        Pointer[c_char],  # Args
-    ](to_char_ptr(format), args)
+    return printf(to_char_ptr(format), args)
 
 
 fn printf[*T: AnyType](format: StringLiteral) -> c_int:
@@ -1273,11 +1269,7 @@ fn printf[*T: AnyType](format: StringLiteral) -> c_int:
         format: A format string.
     Returns: A File Descriptor or -1 in case of failure
     """
-    return external_call[
-        "printf",
-        c_int,  # FnName, RetType
-        Pointer[c_char],  # Args
-    ](to_char_ptr(format))
+    return printf(to_char_ptr(format))
 
 
 fn snprintf[
