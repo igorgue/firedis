@@ -1291,6 +1291,10 @@ fn fprintf[
 
 
 # printf's family function(s) this is used to implement the rest of the printf's family
+fn _printf[callee: StringLiteral](format: Pointer[c_char]) -> c_int:
+    return external_call[callee, c_int, Pointer[c_char]](format)
+
+
 fn _printf[
     callee: StringLiteral, T0: AnyType
 ](format: Pointer[c_char], arg0: T0) -> c_int:
@@ -1348,6 +1352,10 @@ fn _printf[
     )
 
 
+fn _printf[callee: StringLiteral](format: String) -> c_int:
+    return _printf[callee](to_char_ptr(format))
+
+
 fn _printf[callee: StringLiteral, T0: AnyType](format: String, arg0: T0) -> c_int:
     return _printf[callee, T0](to_char_ptr(format), arg0)
 
@@ -1397,12 +1405,84 @@ fn _printf[
     )
 
 
-fn printf[T0: AnyType](format: String, arg0: T0) -> c_int:
-    return _printf["printf", T0](format, arg0)
+fn printf(format: Pointer[c_char]) -> c_int:
+    return _printf["printf"](format)
 
 
 fn printf[T0: AnyType](format: Pointer[c_char], arg0: T0) -> c_int:
     return _printf["printf", T0](format, arg0)
+
+
+fn printf[
+    T0: AnyType, T1: AnyType
+](format: Pointer[c_char], arg0: T0, arg1: T1) -> c_int:
+    return _printf["printf", T0, T1](format, arg0, arg1)
+
+
+fn printf[
+    T0: AnyType, T1: AnyType, T2: AnyType
+](format: Pointer[c_char], arg0: T0, arg1: T1, arg2: T2) -> c_int:
+    return _printf["printf", T0, T1, T2](format, arg0, arg1, arg2)
+
+
+fn printf[
+    T0: AnyType, T1: AnyType, T2: AnyType, T3: AnyType
+](format: Pointer[c_char], arg0: T0, arg1: T1, arg2: T2, arg3: T3) -> c_int:
+    return _printf["printf", T0, T1, T2, T3](format, arg0, arg1, arg2, arg3)
+
+
+fn printf[
+    T0: AnyType, T1: AnyType, T2: AnyType, T3: AnyType, T4: AnyType
+](format: Pointer[c_char], arg0: T0, arg1: T1, arg2: T2, arg3: T3, arg4: T4) -> c_int:
+    return _printf["printf", T0, T1, T2, T3, T4](format, arg0, arg1, arg2, arg3, arg4)
+
+
+fn printf[
+    T0: AnyType, T1: AnyType, T2: AnyType, T3: AnyType, T4: AnyType, T5: AnyType
+](
+    format: Pointer[c_char], arg0: T0, arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5
+) -> c_int:
+    return _printf["printf", T0, T1, T2, T3, T4, T5](
+        format, arg0, arg1, arg2, arg3, arg4, arg5
+    )
+
+
+fn printf(format: String) -> c_int:
+    return _printf["printf"](format)
+
+
+fn printf[T0: AnyType](format: String, arg0: T0) -> c_int:
+    return _printf["printf", T0](format, arg0)
+
+
+fn printf[T0: AnyType, T1: AnyType](format: String, arg0: T0, arg1: T1) -> c_int:
+    return _printf["printf", T0, T1](format, arg0, arg1)
+
+
+fn printf[
+    T0: AnyType, T1: AnyType, T2: AnyType
+](format: String, arg0: T0, arg1: T1, arg2: T2) -> c_int:
+    return _printf["printf", T0, T1, T2](format, arg0, arg1, arg2)
+
+
+fn printf[
+    T0: AnyType, T1: AnyType, T2: AnyType, T3: AnyType
+](format: String, arg0: T0, arg1: T1, arg2: T2, arg3: T3) -> c_int:
+    return _printf["printf", T0, T1, T2, T3](format, arg0, arg1, arg2, arg3)
+
+
+fn printf[
+    T0: AnyType, T1: AnyType, T2: AnyType, T3: AnyType, T4: AnyType
+](format: String, arg0: T0, arg1: T1, arg2: T2, arg3: T3, arg4: T4) -> c_int:
+    return _printf["printf", T0, T1, T2, T3, T4](format, arg0, arg1, arg2, arg3, arg4)
+
+
+fn printf[
+    T0: AnyType, T1: AnyType, T2: AnyType, T3: AnyType, T4: AnyType, T5: AnyType
+](format: String, arg0: T0, arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5) -> c_int:
+    return _printf["printf", T0, T1, T2, T3, T4, T5](
+        format, arg0, arg1, arg2, arg3, arg4, arg5
+    )
 
 
 fn snprintf[
@@ -1857,8 +1937,8 @@ fn __test_getaddrinfo__():
     _ = external_call["printf", c_int, Pointer[c_char], Pointer[c_char]](
         to_char_ptr("gai_strerror: %s"), msg_ptr
     )
-    let msg = c_charptr_to_string(msg_ptr)
-    _ = printf("getaddrinfo satus: %d", msg)
+    # let msg = c_charptr_to_string(msg_ptr)
+    _ = printf("getaddrinfo satus: %d", msg_ptr)
     # getaddrinfo()
 
 

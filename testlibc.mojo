@@ -14,7 +14,7 @@ from sys.intrinsics import _mlirtype_is_eq
 
 fn main():
     let msg = "Hello, world Server"
-    _ = libc.printf("Hello, world %d\n", 10)
+    _ = libc.printf("Hello, world %s\n", msg)
     # let format: String = "test %d\n"
     # let ptr: Pointer[UInt8] = Pointer[UInt8]().alloc(len(format))
     # for i in range(len(format)):
