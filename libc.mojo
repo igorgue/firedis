@@ -127,6 +127,56 @@ fn external_call6[
         )
 
 
+@always_inline("nodebug")
+fn external_call7[
+    callee: StringLiteral,
+    type: AnyType,
+    T0: AnyType,
+    T1: AnyType,
+    T2: AnyType,
+    T3: AnyType,
+    T4: AnyType,
+    T5: AnyType,
+    T6: AnyType,
+](arg0: T0, arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5, arg6: T6) -> type:
+    """Call an external function.
+
+    Parameters:
+      callee: The name of the external function.
+      type: The return type.
+      T0: The first argument type.
+      T1: The second argument type.
+      T2: The third argument type.
+      T3: The fourth argument type.
+      T4: The fifth argument type.
+      T5: The sixth argument type.
+      T6: The seventh argument type.
+
+    Args:
+      arg0: The first argument.
+      arg1: The second argument.
+      arg2: The third argument.
+      arg3: The fourth argument.
+      arg4: The fifth argument.
+      arg5: The sixth argument.
+      arg6: The seventh argument.
+
+    Returns:
+      The external call result.
+    """
+
+    @parameter
+    if _mlirtype_is_eq[type, NoneType]():
+        __mlir_op.`pop.external_call`[func : callee.value, _type:None](
+            arg0, arg1, arg2, arg3, arg4, arg5, arg6
+        )
+        return rebind[type](None)
+    else:
+        return __mlir_op.`pop.external_call`[func : callee.value, _type:type](
+            arg0, arg1, arg2, arg3, arg4, arg5, arg6
+        )
+
+
 # --- ( Network Related Constants )---------------------------------------------
 alias sa_family_t = c_ushort
 alias socklen_t = c_uint
@@ -1210,66 +1260,149 @@ fn fprintf[
     ](stream, format, args)
 
 
-fn printf[*T: AnyType](format: Pointer[c_char], *args: *T) -> c_int:
-    """Libc POSIX `printf` function.
-
-    Reference: https://man7.org/linux/man-pages/man3/fprintf.3p.html
-    Fn signature: int printf(const char *restrict format, ...)
-
-    Args:
-        format: A format string.
-        args: Arguments for the format string.
-    Returns: A File Descriptor or -1 in case of failure
-    """
-    return external_call[
-        "printf",
-        c_int,  # FnName, RetType
-        Pointer[c_char],  # Args
-    ](format, args)
-
-
-fn printf[*T: AnyType](format: Pointer[c_char]) -> c_int:
-    """Libc POSIX `printf` function.
-
-    Reference: https://man7.org/linux/man-pages/man3/fprintf.3p.html
-    Fn signature: int printf(const char *restrict format, ...)
-
-    Args:
-        format: A format string.
-    Returns: A File Descriptor or -1 in case of failure
-    """
-    return external_call[
-        "printf",
-        c_int,  # FnName, RetType
-        Pointer[c_char],  # Args
-    ](format)
+# fn printf(format: Pointer[c_char]) -> c_int:
+#     """Libc POSIX `printf` function.
+#
+#     Reference: https://man7.org/linux/man-pages/man3/fprintf.3p.html
+#     Fn signature: int printf(const char *restrict format, ...)
+#
+#     Args:
+#         format: A format char*.
+#     Returns: Len of the output.
+#     """
+#     return external_call[
+#         "printf",
+#         c_int,  # FnName, RetType
+#         Pointer[c_char],  # Args
+#     ](format)
+#
+#
+# fn printf(format: String) -> c_int:
+#     """Libc POSIX `printf` function.
+#
+#     Reference: https://man7.org/linux/man-pages/man3/fprintf.3p.html
+#     Fn signature: int printf(const char *restrict format, ...)
+#
+#     Args:
+#         format: A format string.
+#     Returns: Len of the output.
+#     """
+#     return printf(to_char_ptr(format))
 
 
-fn printf[*T: AnyType](format: StringLiteral, *args: *T) -> c_int:
-    """Libc POSIX `printf` function.
-
-    Reference: https://man7.org/linux/man-pages/man3/fprintf.3p.html
-    Fn signature: int printf(const char *restrict format, ...)
-
-    Args:
-        format: A format string.
-        args: Arguments for the format string.
-    Returns: A File Descriptor or -1 in case of failure
-    """
-    return printf(to_char_ptr(format), args)
+# printf's family function(s) this is used to implement the rest of the printf's family
+fn _printf[
+    callee: StringLiteral, T0: AnyType
+](format: Pointer[c_char], arg0: T0) -> c_int:
+    return external_call[callee, c_int, Pointer[c_char], T0](format, arg0)
 
 
-fn printf[*T: AnyType](format: StringLiteral) -> c_int:
-    """Libc POSIX `printf` function.
+fn _printf[
+    callee: StringLiteral, T0: AnyType, T1: AnyType
+](format: Pointer[c_char], arg0: T0, arg1: T1) -> c_int:
+    return external_call[callee, c_int, Pointer[c_char], T0, T1](format, arg0, arg1)
 
-    Reference: https://man7.org/linux/man-pages/man3/fprintf.3p.html
-    Fn signature: int printf(const char *restrict format, ...)
 
-    Args:
-        format: A format string.
-    Returns: A File Descriptor or -1 in case of failure
-    """
-    return printf(to_char_ptr(format))
+fn _printf[
+    callee: StringLiteral, T0: AnyType, T1: AnyType, T2: AnyType
+](format: Pointer[c_char], arg0: T0, arg1: T1, arg2: T2) -> c_int:
+    return external_call[callee, c_int, Pointer[c_char], T0, T1, T2](
+        format, arg0, arg1, arg2
+    )
+
+
+fn _printf[
+    callee: StringLiteral, T0: AnyType, T1: AnyType, T2: AnyType, T3: AnyType
+](format: Pointer[c_char], arg0: T0, arg1: T1, arg2: T2, arg3: T3) -> c_int:
+    return external_call[callee, c_int, Pointer[c_char], T0, T1, T2, T3](
+        format, arg0, arg1, arg2, arg3
+    )
+
+
+fn _printf[
+    callee: StringLiteral,
+    T0: AnyType,
+    T1: AnyType,
+    T2: AnyType,
+    T3: AnyType,
+    T4: AnyType,
+](format: Pointer[c_char], arg0: T0, arg1: T1, arg2: T2, arg3: T3, arg4: T4) -> c_int:
+    return external_call6[callee, c_int, Pointer[c_char], T0, T1, T2, T3, T4](
+        format, arg0, arg1, arg2, arg3, arg4
+    )
+
+
+fn _printf[
+    callee: StringLiteral,
+    T0: AnyType,
+    T1: AnyType,
+    T2: AnyType,
+    T3: AnyType,
+    T4: AnyType,
+    T5: AnyType,
+](
+    format: Pointer[c_char], arg0: T0, arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5
+) -> c_int:
+    return external_call7[callee, c_int, Pointer[c_char], T0, T1, T2, T3, T4, T5](
+        format, arg0, arg1, arg2, arg3, arg4, arg5
+    )
+
+
+fn _printf[callee: StringLiteral, T0: AnyType](format: String, arg0: T0) -> c_int:
+    return _printf[callee, T0](to_char_ptr(format), arg0)
+
+
+fn _printf[
+    callee: StringLiteral, T0: AnyType, T1: AnyType
+](format: String, arg0: T0, arg1: T1) -> c_int:
+    return _printf[callee, T0, T1](to_char_ptr(format), arg0, arg1)
+
+
+fn _printf[
+    callee: StringLiteral, T0: AnyType, T1: AnyType, T2: AnyType
+](format: String, arg0: T0, arg1: T1, arg2: T2) -> c_int:
+    return _printf[callee, T0, T1, T2](to_char_ptr(format), arg0, arg1, arg2)
+
+
+fn _printf[
+    callee: StringLiteral, T0: AnyType, T1: AnyType, T2: AnyType, T3: AnyType
+](format: String, arg0: T0, arg1: T1, arg2: T2, arg3: T3) -> c_int:
+    return _printf[callee, T0, T1, T2, T3](to_char_ptr(format), arg0, arg1, arg2, arg3)
+
+
+fn _printf[
+    callee: StringLiteral,
+    T0: AnyType,
+    T1: AnyType,
+    T2: AnyType,
+    T3: AnyType,
+    T4: AnyType,
+](format: String, arg0: T0, arg1: T1, arg2: T2, arg3: T3, arg4: T4) -> c_int:
+    return _printf[callee, T0, T1, T2, T3, T4](
+        to_char_ptr(format), arg0, arg1, arg2, arg3, arg4
+    )
+
+
+fn _printf[
+    callee: StringLiteral,
+    T0: AnyType,
+    T1: AnyType,
+    T2: AnyType,
+    T3: AnyType,
+    T4: AnyType,
+    T5: AnyType,
+](format: String, arg0: T0, arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5) -> c_int:
+    return _printf[callee, T0, T1, T2, T3, T4, T5](
+        to_char_ptr(format), arg0, arg1, arg2, arg3, arg4, arg5
+    )
+
+
+fn printf[T0: AnyType](format: String, arg0: T0) -> c_int:
+    return _printf["printf", T0](format, arg0)
+
+
+fn printf[T0: AnyType](format: Pointer[c_char], arg0: T0) -> c_int:
+    return _printf["printf", T0](format, arg0)
 
 
 fn snprintf[

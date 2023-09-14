@@ -34,7 +34,7 @@ fn main():
     print("inet_pton:", raw_ip, "::", "status: ", conv_status)
 
     let bin_port = htons(UInt16(port))
-    _ = printf("htons: %d\n", bin_port)
+    # _ = printf(to_char_ptr("htons: %d\n"), bin_port)
 
     var ai = sockaddr_in(address_family, bin_port, raw_ip, StaticTuple[8, c_char]())
     let ai_ptr = Pointer[sockaddr_in].address_of(ai).bitcast[sockaddr]()
