@@ -20,7 +20,7 @@ from libc import (
 
 fn main():
     let ip_addr = "0.0.0.0"
-    let port = 8083
+    let port = 6379
 
     print("> starting firedis server at:", ip_addr, ":", port, "🔥")
 
@@ -84,7 +84,7 @@ fn main():
     # inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
     # printf("server: got connection from %s\n", s);
 
-    let msg = "Hello, Mojo!"
+    let msg = "+COSITA\r\n"
     if send(new_sockfd, to_char_ptr(msg).bitcast[c_void](), len(msg), 0) == -1:
         print("> failed to send response")
 
