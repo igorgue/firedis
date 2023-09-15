@@ -5,7 +5,5 @@ from sys.intrinsics import _mlirtype_is_eq
 
 
 fn main():
-    let msg = "Hello, world Server"
-    let msg2 = "Hello, world Server 2"
-    _ = libc.printf("Hello, world %s\n", msg)
-    _ = libc.printf("Hello, world %s %s\n", msg, msg2)  # sadly this doesn't work...
+    let msg = "Hello!"
+    _ = libc.printf("msg: %s\n", msg)

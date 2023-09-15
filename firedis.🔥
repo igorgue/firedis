@@ -1,9 +1,13 @@
+from sys.info import sizeof
+
 from libc import AF_INET, AF_INET6, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, SHUT_RDWR
 from libc import c_char, c_int, c_uint, c_void
 from libc import (
     accept,
     bind,
+    c_charptr_to_string,
     htons,
+    inet_ntop,
     inet_pton,
     listen,
     printf,
@@ -14,6 +18,7 @@ from libc import (
     sockaddr_in,
     socket,
     socklen_t,
+    strlen,
     to_char_ptr,
 )
 
@@ -71,24 +76,42 @@ fn main():
 
     print("> server: started at:", ip_addr, ":", port, "with fd:", sockfd)
 
-    let their_addr_ptr = Pointer[sockaddr].alloc(1)
-    var sin_size = socklen_t(sizeof[socklen_t]())
-    let new_sockfd = accept(
-        sockfd, their_addr_ptr, Pointer[socklen_t].address_of(sin_size)
-    )
-    if new_sockfd == -1:
-        print("Accept failed")
-        # close(sockfd)
-        _ = shutdown(sockfd, SHUT_RDWR)
+    while True:
+        let addr_ptr = Pointer[sockaddr].alloc(1)
+        var sin_size = socklen_t(sizeof[socklen_t]())
+        let new_sockfd = accept(
+            sockfd, addr_ptr, Pointer[socklen_t].address_of(sin_size)
+        )
+        if new_sockfd == -1:
+            print("Accept failed")
+            # close(sockfd)
+            _ = shutdown(sockfd, SHUT_RDWR)
 
-    # inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s);
-    # printf("server: got connection from %s\n", s);
+        print(
+            "> server: got connection from",
+            addr_ptr.bitcast[sockaddr_in]().load().sin_addr.s_addr,
+        )
 
-    let msg = "+COSITA\r\n"
-    if send(new_sockfd, to_char_ptr(msg).bitcast[c_void](), len(msg), 0) == -1:
-        print("> failed to send response")
+        # TODO: figure out how to show the ip address from the user
+        # var sin_addr = addr_ptr.bitcast[sockaddr_in]().load().sin_addr.s_addr
+        # inet_ntop(
+        #     address_family,
+        #     Pointer[UInt32].address_of(sin_addr),
+        #     ip_buf,
+        #     ip_buf_size,
+        # )
+        # let src = to_char_ptr("0.0.0.0.0")
+        # var dst = Pointer[c_char].alloc(14)
+        # let res = inet_ntop(address_family, src, dst, strlen(dst))
+        # print("> server: got connection from", c_charptr_to_string(dst))
 
-    print("> message sent succesfully")
+        let msg = "+COSITA\r\n"
+        if send(new_sockfd, to_char_ptr(msg).bitcast[c_void](), len(msg), 0) == -1:
+            print("> failed to send response")
+            break
+
+        print("> message sent succesfully")
+
     # close(new_fd)
     _ = shutdown(sockfd, SHUT_RDWR)
     # close(new_fd)
