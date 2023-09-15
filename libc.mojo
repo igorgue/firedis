@@ -75,6 +75,10 @@ fn c_charptr_to_string(s: Pointer[c_char]) -> String:
     return String(s.bitcast[Int8](), strlen(s))
 
 
+fn c_charptr_to_string(s: Pointer[c_char], n: c_size_t) -> String:
+    return String(s.bitcast[Int8](), n)
+
+
 # fn cftob(val: c_int) -> Bool:
 #    """Convert C-like failure (-1) to Bool"""
 #    return rebind[Bool](val > 0)

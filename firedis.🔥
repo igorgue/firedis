@@ -7,6 +7,7 @@ from libc import (
     bind,
     c_charptr_to_string,
     htons,
+    inet_ntoa,
     inet_ntop,
     inet_pton,
     listen,
@@ -87,10 +88,14 @@ fn main():
             print("> accept failed")
             _ = shutdown(sockfd, SHUT_RDWR)
 
-        print(
-            "> server: got connection from",
-            addr_ptr.bitcast[sockaddr_in]().load().sin_addr.s_addr,
-        )
+        # TODO: we need to figure out how to show the address
+        #
+        # print(
+        #     "> got connection from:",
+        #     c_charptr_to_string(
+        #         inet_ntoa(addr_ptr.bitcast[sockaddr_in]().load().sin_addr.s_addr)
+        #     ),
+        # )
 
         # TODO: fix this code, we need to get the ip address from the sockaddr_in
         #
@@ -122,12 +127,14 @@ fn main():
             let buf = Pointer[UInt8]().alloc(buf_size)
             let bytes_recv = recv(new_sockfd, buf, buf_size, 0)
 
-            if bytes_recv == -1:
+            print("> bytes received:", bytes_recv)
+
+            if bytes_recv == -1 or bytes_recv == 0:
                 _ = shutdown(new_sockfd, SHUT_RDWR)
                 print("> failed to receive message\n")
                 break
 
-            print("> recived Message: ")
-            print(String(buf.bitcast[Int8](), bytes_recv))
+            print_no_newline("> recived message: ")
+            print(c_charptr_to_string(buf, bytes_recv))
 
     _ = shutdown(sockfd, SHUT_RDWR)
