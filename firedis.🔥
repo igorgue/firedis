@@ -11,6 +11,7 @@ from libc import (
     inet_pton,
     listen,
     printf,
+    recv,
     send,
     setsockopt,
     shutdown,
@@ -67,7 +68,6 @@ fn main():
         print("> set socket options failed")
 
     if bind(sockfd, ai_ptr, sizeof[sockaddr_in]()) == -1:
-        # close(sockfd)
         _ = shutdown(sockfd, SHUT_RDWR)
         print("> Binding socket failed")
 
@@ -82,9 +82,9 @@ fn main():
         let new_sockfd = accept(
             sockfd, addr_ptr, Pointer[socklen_t].address_of(sin_size)
         )
+
         if new_sockfd == -1:
-            print("Accept failed")
-            # close(sockfd)
+            print("> accept failed")
             _ = shutdown(sockfd, SHUT_RDWR)
 
         print(
@@ -109,13 +109,25 @@ fn main():
         # let res = inet_ntop(address_family, src, dst, strlen(dst))
         # print("> server: got connection from", c_charptr_to_string(client_addr))
 
-        let msg = "+COSITA\r\n"
+        let msg = "+OK\r\n"
         if send(new_sockfd, to_char_ptr(msg).bitcast[c_void](), len(msg), 0) == -1:
             print("> failed to send response")
             break
 
         print("> message sent succesfully")
 
-    # close(new_fd)
+        # this should happen in a different thread
+        while True:
+            let buf_size = 1024
+            let buf = Pointer[UInt8]().alloc(buf_size)
+            let bytes_recv = recv(new_sockfd, buf, buf_size, 0)
+
+            if bytes_recv == -1:
+                _ = shutdown(new_sockfd, SHUT_RDWR)
+                print("> failed to receive message\n")
+                break
+
+            print("> recived Message: ")
+            print(String(buf.bitcast[Int8](), bytes_recv))
+
     _ = shutdown(sockfd, SHUT_RDWR)
-    # close(new_fd)

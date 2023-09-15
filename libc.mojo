@@ -2043,12 +2043,12 @@ fn __test_file__():
 
 
 fn main():
-    __test_getaddrinfo__()
-    __test_socket_client__()
+    __test_getaddrinfo__()  # XXX: fails.
+    __test_socket_client__()  # XXX: fails.
 
     try:
-        __test_socket_server__()
+        __test_socket_server__()  # NOTE: passes.
     except e:
         print(e.value)
 
-    __test_file__()
+    __test_file__()  # NOTE: ???
