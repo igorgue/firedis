@@ -27,7 +27,7 @@ fn main():
     let ip_addr = "0.0.0.0"
     let port = 6379
 
-    print("> starting firedis server at:", ip_addr, ":", port, "🔥")
+    print("> starting firedis at ip addr:", ip_addr, ", port:", port, "🔥")
 
     let address_family = AF_INET
     var ip_buf_size = 4
@@ -38,7 +38,7 @@ fn main():
     let conv_status = inet_pton(address_family, to_char_ptr(ip_addr), ip_buf)
     let raw_ip = ip_buf.bitcast[c_uint]().load()
 
-    print("> inet_pton:", raw_ip, "::", "status:", conv_status)
+    print("> inet_pton:", raw_ip, "status:", conv_status)
 
     let bin_port = htons(UInt16(port))
 
@@ -92,18 +92,22 @@ fn main():
             addr_ptr.bitcast[sockaddr_in]().load().sin_addr.s_addr,
         )
 
-        # TODO: figure out how to show the ip address from the user
-        # var sin_addr = addr_ptr.bitcast[sockaddr_in]().load().sin_addr.s_addr
-        # inet_ntop(
+        # TODO: fix this code, we need to get the ip address from the sockaddr_in
+        #
+        # let _sockaddr = addr_ptr.bitcast[sockaddr_in]().load()
+        # var sin_addr = _sockaddr.sin_addr.s_addr
+        # let sin_addr_ptr = Pointer[UInt32].address_of(sin_addr)
+        #
+        # let client_addr = inet_ntop(
         #     address_family,
-        #     Pointer[UInt32].address_of(sin_addr),
+        #     sin_addr_ptr,
         #     ip_buf,
         #     ip_buf_size,
         # )
         # let src = to_char_ptr("0.0.0.0.0")
         # var dst = Pointer[c_char].alloc(14)
         # let res = inet_ntop(address_family, src, dst, strlen(dst))
-        # print("> server: got connection from", c_charptr_to_string(dst))
+        # print("> server: got connection from", c_charptr_to_string(client_addr))
 
         let msg = "+COSITA\r\n"
         if send(new_sockfd, to_char_ptr(msg).bitcast[c_void](), len(msg), 0) == -1:

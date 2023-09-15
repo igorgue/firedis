@@ -505,8 +505,9 @@ fn ntohs(netshort: c_ushort) -> c_ushort:
     return external_call["ntohs", c_ushort, c_ushort](netshort)
 
 
+# FIXME: this doesn't work
 fn inet_ntop(
-    af: c_int, src: Pointer[c_void], dst: Pointer[c_char], size: socklen_t
+    af: c_int, src: Pointer[c_uint], dst: Pointer[c_char], size: socklen_t
 ) -> Pointer[c_char]:
     """Libc POSIX `inet_ntop` function.
 
@@ -525,7 +526,7 @@ fn inet_ntop(
         "inet_ntop",
         Pointer[c_char],  # FnName, RetType
         c_int,
-        Pointer[c_void],
+        Pointer[c_uint],
         Pointer[c_char],
         socklen_t,  # Args
     ](af, src, dst, size)
