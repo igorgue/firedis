@@ -70,7 +70,7 @@ fn main() raises:
 
     if bind(sockfd, ai_ptr, sizeof[sockaddr_in]()) == -1:
         _ = shutdown(sockfd, SHUT_RDWR)
-        print("> Binding socket failed")
+        print("> binding socket failed")
 
     if listen(sockfd, c_int(128)) == -1:
         print("> listen", sockfd, "failed")
