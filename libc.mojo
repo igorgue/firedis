@@ -1260,36 +1260,6 @@ fn fprintf[
     ](stream, format, args)
 
 
-# fn printf(format: Pointer[c_char]) -> c_int:
-#     """Libc POSIX `printf` function.
-#
-#     Reference: https://man7.org/linux/man-pages/man3/fprintf.3p.html
-#     Fn signature: int printf(const char *restrict format, ...)
-#
-#     Args:
-#         format: A format char*.
-#     Returns: Len of the output.
-#     """
-#     return external_call[
-#         "printf",
-#         c_int,  # FnName, RetType
-#         Pointer[c_char],  # Args
-#     ](format)
-#
-#
-# fn printf(format: String) -> c_int:
-#     """Libc POSIX `printf` function.
-#
-#     Reference: https://man7.org/linux/man-pages/man3/fprintf.3p.html
-#     Fn signature: int printf(const char *restrict format, ...)
-#
-#     Args:
-#         format: A format string.
-#     Returns: Len of the output.
-#     """
-#     return printf(to_char_ptr(format))
-
-
 # printf's family function(s) this is used to implement the rest of the printf's family
 fn _printf[callee: StringLiteral](format: Pointer[c_char]) -> c_int:
     return external_call[callee, c_int, Pointer[c_char]](format)

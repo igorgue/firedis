@@ -19,8 +19,10 @@ from libc import (
 
 
 fn main():
-    let ip_addr = "127.0.0.1"
+    let ip_addr = "0.0.0.0"
     let port = 8083
+
+    print("> starting firedis server at:", ip_addr, ":", port, "🔥")
 
     let address_family = AF_INET
     var ip_buf_size = 4
@@ -31,18 +33,20 @@ fn main():
     let conv_status = inet_pton(address_family, to_char_ptr(ip_addr), ip_buf)
     let raw_ip = ip_buf.bitcast[c_uint]().load()
 
-    print("inet_pton:", raw_ip, "::", "status: ", conv_status)
+    print("> inet_pton:", raw_ip, "::", "status:", conv_status)
 
     let bin_port = htons(UInt16(port))
-    # _ = printf(to_char_ptr("htons: %d\n"), bin_port)
+
+    print("> htons:", bin_port)
 
     var ai = sockaddr_in(address_family, bin_port, raw_ip, StaticTuple[8, c_char]())
     let ai_ptr = Pointer[sockaddr_in].address_of(ai).bitcast[sockaddr]()
 
     let sockfd = socket(address_family, SOCK_STREAM, 0)
     if sockfd == -1:
-        print("Socket creation error")
-    # _ = printf("sockfd: %d\n", sockfd)
+        print("> socket creation error")
+
+    print("> sockfd:", sockfd)
 
     var yes: Int = 1
     if (
@@ -55,23 +59,17 @@ fn main():
         )
         == -1
     ):
-        print("set socket options failed")
+        print("> set socket options failed")
 
     if bind(sockfd, ai_ptr, sizeof[sockaddr_in]()) == -1:
         # close(sockfd)
         _ = shutdown(sockfd, SHUT_RDWR)
-        print("Binding socket failed")
+        print("> Binding socket failed")
 
     if listen(sockfd, c_int(128)) == -1:
-        print("listen")
-        # _ = printf("Listen %d failed.\n", sockfd)
+        print("> listen", sockfd, "failed")
 
-    # _ = printf(
-    #     "server: started at %s : %d with fd %d – waiting for connections...\n",
-    #     ip_addr,
-    #     port,
-    #     sockfd,
-    # )
+    print("> server: started at:", ip_addr, ":", port, "with fd:", sockfd)
 
     let their_addr_ptr = Pointer[sockaddr].alloc(1)
     var sin_size = socklen_t(sizeof[socklen_t]())
@@ -88,11 +86,9 @@ fn main():
 
     let msg = "Hello, Mojo!"
     if send(new_sockfd, to_char_ptr(msg).bitcast[c_void](), len(msg), 0) == -1:
-        print("Failed to send response")
-    print("Message sent succesfully")
+        print("> failed to send response")
+
+    print("> message sent succesfully")
     # close(new_fd)
     _ = shutdown(sockfd, SHUT_RDWR)
     # close(new_fd)
-
-
-# vim: ft=mojo
