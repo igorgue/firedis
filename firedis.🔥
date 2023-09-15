@@ -25,11 +25,11 @@ from libc import (
 )
 
 
-fn main():
+fn main() raises:
     let ip_addr = "0.0.0.0"
     let port = 6379
 
-    print("> starting firedis at ip addr:", ip_addr, ", port:", port, "🔥")
+    print("> starting firedis at ip addr:", ip_addr, "port:", port, "🔥")
 
     let address_family = AF_INET
     var ip_buf_size = 4
@@ -75,7 +75,7 @@ fn main():
     if listen(sockfd, c_int(128)) == -1:
         print("> listen", sockfd, "failed")
 
-    print("> server: started at:", ip_addr, ":", port, "with fd:", sockfd)
+    print("> started at:", ip_addr, "port:", port, "with fd:", sockfd)
 
     while True:
         let addr_ptr = Pointer[sockaddr].alloc(1)
@@ -86,7 +86,7 @@ fn main():
 
         if new_sockfd == -1:
             print("> accept failed")
-            _ = shutdown(sockfd, SHUT_RDWR)
+            break
 
         # TODO: we need to figure out how to show the address
         #
@@ -114,13 +114,6 @@ fn main():
         # let res = inet_ntop(address_family, src, dst, strlen(dst))
         # print("> server: got connection from", c_charptr_to_string(client_addr))
 
-        let msg = "+OK\r\n"
-        if send(new_sockfd, to_char_ptr(msg).bitcast[c_void](), len(msg), 0) == -1:
-            print("> failed to send response")
-            break
-
-        print("> message sent succesfully")
-
         # this should happen in a different thread
         while True:
             let buf_size = 1024
@@ -130,11 +123,18 @@ fn main():
             print("> bytes received:", bytes_recv)
 
             if bytes_recv == -1 or bytes_recv == 0:
-                _ = shutdown(new_sockfd, SHUT_RDWR)
                 print("> failed to receive message\n")
                 break
 
             print_no_newline("> recived message: ")
             print(c_charptr_to_string(buf, bytes_recv))
+
+            # TODO: respond!
+            let msg = "+PONG\r\n"
+            if send(new_sockfd, to_char_ptr(msg).bitcast[c_void](), len(msg), 0) == -1:
+                print("> failed to send response")
+                break
+
+            print("> message sent succesfully")
 
     _ = shutdown(sockfd, SHUT_RDWR)
