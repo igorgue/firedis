@@ -26,39 +26,37 @@ from libc import (
     to_char_ptr,
 )
 
+alias FIREDIS_MAX_CLIENTS = 128
+alias FIREDIS_CORE_MULTIPLIER = 100
+alias FIREDIS_PORT = 6379
+alias FIREDIS_HOST = "0.0.0.0"
+
 
 fn respond_to_message(msg: String) -> String:
     return "+PONG\r\n"
 
 
 fn respond_to_client(new_sockfd: c_int) -> None:
-    with Runtime() as rt:
+    while True:
+        let buf_size = 1024
+        let buf = Pointer[c_char]().alloc(buf_size)
+        let bytes_recv = recv(new_sockfd, buf, buf_size, 0)
 
-        @always_inline
-        @parameter
-        fn handle_message(n: Int):
-            while True:
-                let buf_size = 1024
-                let buf = Pointer[c_char]().alloc(buf_size)
-                let bytes_recv = recv(new_sockfd, buf, buf_size, 0)
+        print("> bytes received:", bytes_recv)
 
-                print("> bytes received:", bytes_recv, "from core", n)
+        if bytes_recv == -1 or bytes_recv == 0:
+            print("> failed to receive message")
+            break
 
-                if bytes_recv == -1 or bytes_recv == 0:
-                    print("> failed to receive message, core:", n)
-                    break
+        let msg = c_charptr_to_string(buf, bytes_recv)
+        print("> recived message:", msg)
 
-                let msg = c_charptr_to_string(buf, bytes_recv)
-                print("> recived message:", msg, "from core:", n)
+        let reply = respond_to_message(msg)
+        if send(new_sockfd, to_char_ptr(reply), len(reply), 0) == -1:
+            print("> failed to send response:", reply)
+            break
 
-                let reply = respond_to_message(msg)
-                if send(new_sockfd, to_char_ptr(reply), len(reply), 0) == -1:
-                    print("> failed to send response:", reply, "core:", n)
-                    break
-
-                print("> message sent succesfully to core:", n)
-
-        parallelize[handle_message](rt, num_cores())
+        print("> message sent succesfully")
 
 
 fn wait_for_clients(sockfd: c_int):
@@ -85,12 +83,16 @@ fn wait_for_clients(sockfd: c_int):
 
                 respond_to_client(new_sockfd)
 
-            parallelize[handle_client](rt, num_cores())
+            let max_clients = FIREDIS_MAX_CLIENTS
+            let multiplier = FIREDIS_CORE_MULTIPLIER
+            let workers = (num_cores() * multiplier) % max_clients
+
+            parallelize[handle_client](rt, workers)
 
 
 fn main() raises -> None:
-    let ip_addr = "0.0.0.0"
-    let port = 6379
+    let ip_addr = FIREDIS_HOST
+    let port = FIREDIS_PORT
 
     print("> starting firedis at ip addr:", ip_addr, "port:", port, "🔥")
 
