@@ -510,6 +510,29 @@ fn ntohs(netshort: c_ushort) -> c_ushort:
 
 
 # FIXME: this doesn't work
+#
+# NOTE: here's what we want to do:
+# print(
+#     "> got connection from:",
+#     c_charptr_to_string(
+#         inet_ntoa(addr_ptr.bitcast[sockaddr_in]().load().sin_addr.s_addr)
+#     ),
+# )
+#
+# let _sockaddr = addr_ptr.bitcast[sockaddr_in]().load()
+# var sin_addr = _sockaddr.sin_addr.s_addr
+# let sin_addr_ptr = Pointer[UInt32].address_of(sin_addr)
+#
+# let client_addr = inet_ntop(
+#     address_family,
+#     sin_addr_ptr,
+#     ip_buf,
+#     ip_buf_size,
+# )
+# let src = to_char_ptr("0.0.0.0.0")
+# var dst = Pointer[c_char].alloc(14)
+# let res = inet_ntop(address_family, src, dst, strlen(dst))
+# print("> server: got connection from", c_charptr_to_string(client_addr))
 fn inet_ntop(
     af: c_int, src: Pointer[c_uint], dst: Pointer[c_char], size: socklen_t
 ) -> Pointer[c_char]:

@@ -1,4 +1,6 @@
 from sys.info import sizeof
+from runtime.llcl import Runtime
+from algorithm import parallelize, num_cores
 
 from libc import AF_INET, AF_INET6, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, SHUT_RDWR
 from libc import c_char, c_int, c_uint, c_void
@@ -25,7 +27,68 @@ from libc import (
 )
 
 
-fn main() raises:
+fn respond_to_message(msg: String) -> String:
+    return "+PONG\r\n"
+
+
+fn respond_to_client(new_sockfd: c_int) -> None:
+    with Runtime() as rt:
+
+        @always_inline
+        @parameter
+        fn handle_message(n: Int):
+            while True:
+                let buf_size = 1024
+                let buf = Pointer[c_char]().alloc(buf_size)
+                let bytes_recv = recv(new_sockfd, buf, buf_size, 0)
+
+                print("> bytes received:", bytes_recv, "from core", n)
+
+                if bytes_recv == -1 or bytes_recv == 0:
+                    print("> failed to receive message, core:", n)
+                    break
+
+                let msg = c_charptr_to_string(buf, bytes_recv)
+                print("> recived message:", msg, "from core:", n)
+
+                let reply = respond_to_message(msg)
+                if send(new_sockfd, to_char_ptr(reply), len(reply), 0) == -1:
+                    print("> failed to send response:", reply, "core:", n)
+                    break
+
+                print("> message sent succesfully to core:", n)
+
+        parallelize[handle_message](rt, num_cores())
+
+
+fn wait_for_clients(sockfd: c_int):
+    print("> waiting for connections...")
+
+    while True:
+        with Runtime() as rt:
+
+            @always_inline
+            @parameter
+            fn handle_client(n: Int):
+                let addr_ptr = Pointer[sockaddr].alloc(1)
+                var sin_size = socklen_t(sizeof[socklen_t]())
+
+                let new_sockfd = accept(
+                    sockfd, addr_ptr, Pointer[socklen_t].address_of(sin_size)
+                )
+
+                if new_sockfd == -1:
+                    print("> accept failed")
+                    return
+                else:
+                    print("> new connection accepted with fd:", new_sockfd)
+
+                respond_to_client(new_sockfd)
+
+            parallelize[handle_client](rt, num_cores())
+
+
+fn main() raises -> None:
     let ip_addr = "0.0.0.0"
     let port = 6379
 
@@ -77,64 +140,6 @@ fn main() raises:
 
     print("> started at:", ip_addr, "port:", port, "with fd:", sockfd)
 
-    while True:
-        let addr_ptr = Pointer[sockaddr].alloc(1)
-        var sin_size = socklen_t(sizeof[socklen_t]())
-        let new_sockfd = accept(
-            sockfd, addr_ptr, Pointer[socklen_t].address_of(sin_size)
-        )
-
-        if new_sockfd == -1:
-            print("> accept failed")
-            break
-
-        # TODO: we need to figure out how to show the address
-        #
-        # print(
-        #     "> got connection from:",
-        #     c_charptr_to_string(
-        #         inet_ntoa(addr_ptr.bitcast[sockaddr_in]().load().sin_addr.s_addr)
-        #     ),
-        # )
-
-        # TODO: fix this code, we need to get the ip address from the sockaddr_in
-        #
-        # let _sockaddr = addr_ptr.bitcast[sockaddr_in]().load()
-        # var sin_addr = _sockaddr.sin_addr.s_addr
-        # let sin_addr_ptr = Pointer[UInt32].address_of(sin_addr)
-        #
-        # let client_addr = inet_ntop(
-        #     address_family,
-        #     sin_addr_ptr,
-        #     ip_buf,
-        #     ip_buf_size,
-        # )
-        # let src = to_char_ptr("0.0.0.0.0")
-        # var dst = Pointer[c_char].alloc(14)
-        # let res = inet_ntop(address_family, src, dst, strlen(dst))
-        # print("> server: got connection from", c_charptr_to_string(client_addr))
-
-        # this should happen in a different thread
-        while True:
-            let buf_size = 1024
-            let buf = Pointer[UInt8]().alloc(buf_size)
-            let bytes_recv = recv(new_sockfd, buf, buf_size, 0)
-
-            print("> bytes received:", bytes_recv)
-
-            if bytes_recv == -1 or bytes_recv == 0:
-                print("> failed to receive message\n")
-                break
-
-            print_no_newline("> recived message: ")
-            print(c_charptr_to_string(buf, bytes_recv))
-
-            # TODO: respond!
-            let msg = "+PONG\r\n"
-            if send(new_sockfd, to_char_ptr(msg).bitcast[c_void](), len(msg), 0) == -1:
-                print("> failed to send response")
-                break
-
-            print("> message sent succesfully")
+    wait_for_clients(sockfd)
 
     _ = shutdown(sockfd, SHUT_RDWR)
