@@ -37,27 +37,34 @@ fn respond_to_message(msg: String) -> String:
     return "+PONG\r\n"
 
 
-fn respond_to_client(new_sockfd: c_int) -> None:
-    while True:
-        let buf_size = 1024
-        let buf = Pointer[c_char]().alloc(buf_size)
-        let bytes_recv = recv(new_sockfd, buf, buf_size, 0)
+fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
+    with Runtime() as rt:
 
-        print("> bytes received:", bytes_recv)
+        @always_inline
+        @parameter
+        fn handle_client(n: Int):
+            while True:
+                let buf_size = 1024
+                let buf = Pointer[c_char]().alloc(buf_size)
+                let bytes_recv = recv(new_sockfd, buf, buf_size, 0)
 
-        if bytes_recv == -1 or bytes_recv == 0:
-            print("> failed to receive message")
-            break
+                print("> bytes received:", bytes_recv)
 
-        let msg = c_charptr_to_string(buf, bytes_recv)
-        print("> recived message:", msg)
+                if bytes_recv == -1 or bytes_recv == 0:
+                    print("> failed to receive message")
+                    break
 
-        let reply = respond_to_message(msg)
-        if send(new_sockfd, to_char_ptr(reply), len(reply), 0) == -1:
-            print("> failed to send response:", reply)
-            break
+                let msg = c_charptr_to_string(buf, bytes_recv)
+                print("> recived message:", msg)
 
-        print("> message sent succesfully")
+                let reply = respond_to_message(msg)
+                if send(new_sockfd, to_char_ptr(reply), len(reply), 0) == -1:
+                    print("> failed to send response:", reply)
+                    break
+
+                print("> message sent succesfully")
+
+        parallelize[handle_client](rt, workers)
 
 
 fn wait_for_clients(sockfd: c_int, workers: Int) -> None:
@@ -82,7 +89,7 @@ fn wait_for_clients(sockfd: c_int, workers: Int) -> None:
                 else:
                     print("> new connection accepted with fd:", new_sockfd)
 
-                respond_to_client(new_sockfd)
+                respond_to_client(new_sockfd, workers)
 
             parallelize[handle_client](rt, workers)
 
