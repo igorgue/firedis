@@ -42,7 +42,7 @@ fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
 
         @always_inline
         @parameter
-        fn handle_client(n: Int):
+        fn handle_messages(n: Int):
             while True:
                 let buf_size = 1024
                 let buf = Pointer[c_char]().alloc(buf_size)
@@ -64,7 +64,7 @@ fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
 
                 print("> message sent succesfully")
 
-        parallelize[handle_client](rt, workers)
+        parallelize[handle_messages](rt, workers)
 
 
 fn wait_for_clients(sockfd: c_int, workers: Int) -> None:
