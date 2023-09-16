@@ -33,37 +33,6 @@ alias FIREDIS_CORE_MULTIPLIER = 1000
 alias FIREDIS_PORT = 6379
 alias FIREDIS_HOST = "0.0.0.0"
 
-
-@register_passable("trivial")
-struct FiredisConfig:
-    var max_clients: UInt8
-    var core_multiplier: UInt8
-    var port: UInt16
-    var host: Pointer[UInt8]
-
-    fn __init__() raises -> Self:
-        var max_clients = atol(getenv("MAX_CLIENTS", "-1"))
-        var core_multiplier = atol(getenv("CORE_MULTIPLIER", "-1"))
-        var port = atol(getenv("PORT", "-1"))
-        let host = to_char_ptr(getenv("HOST", FIREDIS_HOST))
-
-        if port == -1:
-            port = FIREDIS_PORT
-
-        if core_multiplier == -1:
-            core_multiplier = FIREDIS_CORE_MULTIPLIER
-
-        if max_clients == -1:
-            max_clients = FIREDIS_MAX_CLIENTS
-
-        return Self {
-            max_clients: max_clients,
-            core_multiplier: core_multiplier,
-            port: port,
-            host: host,
-        }
-
-
 # redis tokens
 alias REDIS_CRLF = "\r\n"
 alias REDIS_STRING = "+"
