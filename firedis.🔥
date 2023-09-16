@@ -27,14 +27,83 @@ from libc import (
     to_char_ptr,
 )
 
+# firedis config, and defaults
 alias FIREDIS_MAX_CLIENTS = 128
 alias FIREDIS_CORE_MULTIPLIER = 1000
 alias FIREDIS_PORT = 6379
 alias FIREDIS_HOST = "0.0.0.0"
 
 
+# TODO: actually use this.
+@register_passable("trivial")
+struct FiredisConfig:
+    var max_clients: UInt8
+    var core_multiplier: UInt8
+    var port: UInt16
+    var host: Pointer[UInt8]
+
+    fn __init__(inout self: Self) -> Self:
+        let host_ptr = to_char_ptr(FIREDIS_HOST)
+
+        return Self {
+            max_clients: FIREDIS_MAX_CLIENTS,
+            core_multiplier: FIREDIS_CORE_MULTIPLIER,
+            port: FIREDIS_PORT,
+            host: host_ptr,
+        }
+
+
+# redis tokens
+alias REDIS_CRLF = "\r\n"
+alias REDIS_STRING = "+"
+alias REDIS_ERROR = "-"
+alias REDIS_INTEGER = ":"
+alias REDIS_BULK_STRING = "$"
+alias REDIS_ARRAY = "*"
+alias REDIS_NULL = "_"
+alias REDIS_BOOL = "#"
+alias REDIS_DOUBLE = ","
+alias REDIS_BIG_NUMBER = "("
+alias REDIS_BULK_ERRORS = "!"
+alias REDIS_VERBATIM_STRING = "="
+alias REDIS_MAP = "%"
+alias REDIS_SET = "~"
+alias REDIS_PUSHES = "|"
+
+
+struct FiredisParser:
+    var start: Pointer[UInt8]
+    var current: Pointer[UInt8]
+    var result: String
+
+    fn __init__(inout self: Self, msg: String):
+        let msg_ptr = to_char_ptr(msg)
+
+        self.start = msg_ptr
+        self.current = msg_ptr
+        self.result = ""
+
+    fn parse(inout self: Self) -> None:
+        self.result = "+PONG" + REDIS_CRLF
+
+    fn peek(inout self: Self) -> UInt8:
+        return self.current.load()
+
+    fn advance(inout self: Self) -> UInt8:
+        self.current = self.current + 1
+
+        return (self.current - 1).load()
+
+    fn peek_next(inout self: Self) -> UInt8:
+        return self.current[1]
+
+
 fn reply_to_message(msg: String) -> String:
-    return "+PONG\r\n"
+    var parser = FiredisParser(msg)
+
+    parser.parse()
+
+    return parser.result
 
 
 fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
