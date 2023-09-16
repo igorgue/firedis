@@ -34,7 +34,6 @@ alias FIREDIS_PORT = 6379
 alias FIREDIS_HOST = "0.0.0.0"
 
 
-# TODO: actually use this.
 @register_passable("trivial")
 struct FiredisConfig:
     var max_clients: UInt8
@@ -42,14 +41,26 @@ struct FiredisConfig:
     var port: UInt16
     var host: Pointer[UInt8]
 
-    fn __init__(inout self: Self) -> Self:
-        let host_ptr = to_char_ptr(FIREDIS_HOST)
+    fn __init__() raises -> Self:
+        var max_clients = atol(getenv("MAX_CLIENTS", "-1"))
+        var core_multiplier = atol(getenv("CORE_MULTIPLIER", "-1"))
+        var port = atol(getenv("PORT", "-1"))
+        let host = to_char_ptr(getenv("HOST", FIREDIS_HOST))
+
+        if port == -1:
+            port = FIREDIS_PORT
+
+        if core_multiplier == -1:
+            core_multiplier = FIREDIS_CORE_MULTIPLIER
+
+        if max_clients == -1:
+            max_clients = FIREDIS_MAX_CLIENTS
 
         return Self {
-            max_clients: FIREDIS_MAX_CLIENTS,
-            core_multiplier: FIREDIS_CORE_MULTIPLIER,
-            port: FIREDIS_PORT,
-            host: host_ptr,
+            max_clients: max_clients,
+            core_multiplier: core_multiplier,
+            port: port,
+            host: host,
         }
 
 
@@ -86,24 +97,55 @@ struct FiredisParser:
     fn parse(inout self: Self) -> None:
         self.result = "+PONG" + REDIS_CRLF
 
-    fn peek(inout self: Self) -> UInt8:
-        return self.current.load()
-
     fn advance(inout self: Self) -> UInt8:
         self.current = self.current + 1
 
         return (self.current - 1).load()
 
+    fn peek(inout self: Self) -> UInt8:
+        return self.current.load()
+
     fn peek_next(inout self: Self) -> UInt8:
         return self.current[1]
+
+    fn is_digit(inout self: Self, c: UInt8) -> Bool:
+        return c >= ord("0") and c <= ord("9")
+
+    fn is_alpha(inout self: Self, c: UInt8) -> Bool:
+        return (c >= ord("a") and c <= ord("z")) or (c >= ord("A") and c <= ord("Z"))
+
+    fn is_at_end(inout self: Self) -> Bool:
+        return self.current.load() == 0
+
+    fn match_char(inout self: Self, c: UInt8) -> Bool:
+        if self.is_at_end():
+            return False
+
+        if self.current.load() != c:
+            return False
+
+        self.current += 1
+        return True
+
+    fn make_string(inout self: Self, msg: String) -> String:
+        let msg_len = len(msg)
+        let buf = Pointer[c_char]().alloc(1 + msg_len + 2)
+
+        buf.store(0, ord(REDIS_STRING))
+
+        for i in range(msg_len):
+            buf.store(i + 1, ord(msg[i]))
+
+        buf.store(msg_len + 1, ord(String(REDIS_CRLF.data())[0]))
+        buf.store(msg_len + 2, ord(String(REDIS_CRLF.data())[1]))
+
+        return c_charptr_to_string(buf, 1 + msg_len + 2)
 
 
 fn reply_to_message(msg: String) -> String:
     var parser = FiredisParser(msg)
 
-    parser.parse()
-
-    return parser.result
+    return parser.make_string("PONG")
 
 
 fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
