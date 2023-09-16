@@ -33,7 +33,7 @@ alias FIREDIS_PORT = 6379
 alias FIREDIS_HOST = "0.0.0.0"
 
 
-fn respond_to_message(msg: String) -> String:
+fn reply_to_message(msg: String) -> String:
     return "+PONG\r\n"
 
 
@@ -50,19 +50,19 @@ fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
 
                 print("> bytes received:", bytes_recv)
 
-                if bytes_recv == -1 or bytes_recv == 0:
-                    print("> failed to receive message")
+                if bytes_recv <= 0:
+                    print("> failed to receive message, client disconnected?")
                     break
 
                 let msg = c_charptr_to_string(buf, bytes_recv)
                 print("> recived message:", msg)
 
-                let reply = respond_to_message(msg)
+                let reply = reply_to_message(msg)
                 if send(new_sockfd, to_char_ptr(reply), len(reply), 0) == -1:
-                    print("> failed to send response:", reply)
+                    print("> failed to send reply:", reply)
                     break
 
-                print("> message sent succesfully")
+                print("> message sent succesfully:", reply)
 
         parallelize[handle_messages](rt, workers)
 
