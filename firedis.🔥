@@ -140,19 +140,29 @@ struct FiredisParser:
         self.current += 1
         return True
 
-    fn make_string(inout self: Self, msg: String) -> String:
+    fn make_msg(inout self: Self, header: String, msg: String) -> String:
         let msg_len = len(msg)
-        let buf = Pointer[c_char]().alloc(1 + msg_len + 2)
+        let header_len = len(header)
+        let buf = Pointer[c_char]().alloc(header_len + msg_len + 2)
 
-        buf.store(0, ord(REDIS_STRING))
+        buf.store(0, ord(header))
 
         for i in range(msg_len):
-            buf.store(i + 1, ord(msg[i]))
+            buf.store(header_len + i + 1, ord(msg[i]))
 
-        buf.store(msg_len + 1, ord(String(REDIS_CRLF.data())[0]))
-        buf.store(msg_len + 2, ord(String(REDIS_CRLF.data())[1]))
+        buf.store(header_len + msg_len + 1, ord(String(REDIS_CRLF.data())[0]))
+        buf.store(header_len + msg_len + 2, ord(String(REDIS_CRLF.data())[1]))
 
-        return c_charptr_to_string(buf, 1 + msg_len + 2)
+        return c_charptr_to_string(buf, header_len + msg_len + 2)
+
+    fn make_string(inout self: Self, msg: String) -> String:
+        return self.make_msg(REDIS_STRING, msg)
+
+    fn make_error(inout self: Self, msg: String) -> String:
+        return self.make_msg(REDIS_ERROR, msg)
+
+    fn make_integer(inout self: Self, msg: Int) -> String:
+        return self.make_msg(REDIS_INTEGER, String(msg))
 
 
 fn reply_to_message(msg: String) -> String:
