@@ -10,11 +10,10 @@ from libc import (
     bind,
     c_charptr_to_string,
     htons,
-    inet_ntoa,
+    # inet_ntoa,
     inet_ntop,
     inet_pton,
     listen,
-    printf,
     recv,
     send,
     setsockopt,
@@ -148,10 +147,10 @@ struct FiredisParser:
         buf.store(0, ord(header))
 
         for i in range(msg_len):
-            buf.store(header_len + i + 1, ord(msg[i]))
+            buf.store(header_len + i, ord(msg[i]))
 
-        buf.store(header_len + msg_len + 1, ord(String(REDIS_CRLF.data())[0]))
-        buf.store(header_len + msg_len + 2, ord(String(REDIS_CRLF.data())[1]))
+        buf.store(header_len + msg_len, ord(String(REDIS_CRLF.data())[0]))
+        buf.store(header_len + msg_len + 1, ord(String(REDIS_CRLF.data())[1]))
 
         return c_charptr_to_string(buf, header_len + msg_len + 2)
 
