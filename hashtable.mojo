@@ -22,6 +22,10 @@ struct Item[T: AnyType]:
     fn __eq__(self, other: None) -> Bool:
         return False
 
+    # FIXME: this is an error, cannot compare Ts
+    # fn __eq__(self, other: Item[T]) -> Bool:
+    #     return self.key == other.key and self.value == other.value
+
     fn set_value(inout self: Self, value: T):
         self.value = value
 
