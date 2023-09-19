@@ -131,3 +131,17 @@ struct HashTable[T: AnyType]:
                     let item = bucket[j]
 
                     self.put(item.key, item.value)
+
+    def display(inout self: Self) -> None:
+        print("\n*****************")
+
+        for i in range(self.size):
+            let bucket = self.table[i]
+
+            for j in range(bucket.size):
+                let item = bucket[j]
+
+                print_no_newline(item.key)
+                print(": ", rebind[Int](item.value))
+
+        print("*****************")

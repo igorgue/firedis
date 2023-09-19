@@ -100,6 +100,12 @@ fn test_hashtable() -> Bool:
     var hash_table = HashTable[Int](10)
 
     hash_table.put("time", 123)
+    hash_table.put("time2", 123)
+
+    try:
+        hash_table.display()
+    except e:
+        print(e.value)
 
     if assert_equal(hash_table.table[8][0].value, 123):
         print_no_newline(".")
