@@ -8,7 +8,7 @@ fn main():
     var msg = "Hello!"
     _ = libc.printf("msg: %s\n", msg)
 
-    print(libc.exit(0))
+    libc.exit(-1)
 
     msg = "Hello again!"
     _ = libc.printf("msg: %s\n", msg)

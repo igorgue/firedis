@@ -14,3 +14,9 @@ run.python:
 .PHONY: clean
 clean:
 	rm firedis
+
+.PHONY: test
+test:
+	@for test in `ls test_*.mojo`; do \
+		$(MOJO) run $$test; \
+	done

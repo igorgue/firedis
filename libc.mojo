@@ -1912,7 +1912,7 @@ fn closelog():
 # --- ( Other libc functions ) ----------------------------------------------------
 
 
-fn exit(status: c_int) -> c_void:
+fn exit(status: c_int) -> None:
     """Libc POSIX `exit` function.
 
     Reference: https://man7.org/linux/man-pages/man3/exit.3.html
@@ -1922,7 +1922,7 @@ fn exit(status: c_int) -> c_void:
         status: The exit status.
     Returns: void.
     """
-    return external_call["exit", c_void, c_int](status)
+    _ = external_call["exit", c_void, c_int](status)
 
 
 # --- ( Testing Functions ) ----------------------------------------------------
