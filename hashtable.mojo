@@ -22,6 +22,9 @@ struct Item[T: AnyType]:
     fn __eq__(self, other: None) -> Bool:
         return False
 
+    fn set_value(inout self: Self, value: T):
+        self.value = value
+
 
 @register_passable("trivial")
 struct Array[T: AnyType]:
@@ -47,54 +50,51 @@ struct Array[T: AnyType]:
     fn __ne__(self, other: Array[T]) -> Bool:
         return not self.data == other.data
 
+    fn resize(inout self: Self, new_size: Int):
+        let new_cap = new_size * 2
+        let new_data = Pointer[T].alloc(new_cap)
 
-struct HashTable:
+        for i in range(new_size):
+            new_data.store(i, self.data.load(i))
+
+        self.data.free()
+        self.data = new_data
+        self.size = new_size
+        self.cap = new_cap
+
+
+struct HashTable[T: AnyType]:
     var size: Int
-    var table: Array[Array[Item[AnyType]]]
+    var table: Array[Array[Item[T]]]
     var count: Int
 
     fn __init__(inout self: Self, size: Int):
         self.size = size
         self.count = 0
-        self.table = Array[Array[Item[AnyType]]](self.size)
+        self.table = Array[Array[Item[T]]](size)
+
+        for i in range(size):
+            self.table[i] = Array[Item[T]](0)
 
     fn hash_function(self, key: StringRef) -> Int:
         return hash_fn(key) % self.size
 
-    fn put[T: AnyType](inout self: Self, key: StringRef, value: T):
-        if self.count >= self.size:
+    fn put(inout self: Self, key: StringRef, value: T):
+        let hash_index = self.hash_function(key)
+
+        for i in range(self.table[hash_index].size):
+            if self.table[hash_index][i].key == key:
+                self.table[hash_index][i].set_value(value)
+                return
+
+        let item = Item[T](key, value)
+
+        self.table[hash_index].data.store(self.table[hash_index].size, item)
+        self.table[hash_index].resize(self.table[hash_index].size + 1)
+
+        self.count += 1
+        if self.count > self.size:
             self.resize()
-
-            let hash_index = self.hash_function(key)
-
-            for i in range(len(self.table[hash_index].size)):
-                if self.table[hash_index][i].key == key:
-                    var item = self.table[hash_index][i]
-                    item.value = rebind[AnyType](value)
-
-                    return
-
-            let items = self.table[hash_index]
-
-            for i in range(items.size):
-                var item = items[i]
-
-                if item == None:
-                    item = Item(key, rebind[AnyType](value))
-                    self.count += 1
-                    return
-
-            for i in range(self.table[hash_index].size):
-                var item = self.table[hash_index][i]
-                if item.key == key:
-                    item.value = rebind[AnyType](value)
-                    return
-
-            self.table[hash_index].data.store(
-                self.table[hash_index].size, Item(key, rebind[AnyType](value))
-            )
-
-            self.count += 1
 
     fn get(self: Self, key: StringRef) -> AnyType:
         let hash_index = self.hash_function(key)
@@ -112,7 +112,7 @@ struct HashTable:
         for i in range(self.table[hash_index].size):
             let item = self.table[hash_index][i]
             if item.key == key:
-                self.table[hash_index][i] = rebind[Item[AnyType]](None)
+                self.table[hash_index][i] = rebind[Item[T]](None)
 
                 self.count -= 1
                 return
@@ -120,7 +120,7 @@ struct HashTable:
     fn resize(inout self: Self):
         let old_table = self.table.data
         self.size *= 2
-        self.table = Array[Array[Item[AnyType]]](self.size)
+        self.table = Array[Array[Item[T]]](self.size)
         self.count = 0
 
         for i in range(self.size):

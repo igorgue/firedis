@@ -97,13 +97,27 @@ fn test_array() -> Bool:
 
 
 fn test_hashtable() -> Bool:
-    var hash_table = HashTable(10)
+    var hash_table = HashTable[Int](10)
 
-    hash_table.put[Int]("foo", 1)
+    hash_table.put("time", 123)
 
-    # let val = hash_table.get("foo")
-    #
-    # print("tst", rebind[Int](val))
+    if assert_equal(hash_table.table[8][0].value, 123):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    if assert_equal(hash_table.table[8].size, 1):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    if assert_equal(hash_table.table[8].cap, 2):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
 
     return True
 
