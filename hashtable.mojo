@@ -1,6 +1,14 @@
-# TODO: implement these hash functions
+from math import abs
+
+
 fn hash_fn(key: String) -> Int:
-    return 0
+    var hash = 2166136261
+
+    for i in range(len(key)):
+        hash ^= ord(key[i])
+        hash *= 16777619
+
+    return abs(hash)
 
 
 @register_passable("trivial")
@@ -14,7 +22,7 @@ struct Item[T: AnyType]:
     fn __eq__(self, other: None) -> Bool:
         return False
 
-    fn __eq__(self, other: Item[AnyType]) -> Bool:
+    fn __eq__[T: AnyType](self, other: Item[T]) -> Bool:
         return self.key == other.key
 
 
