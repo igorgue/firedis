@@ -58,7 +58,10 @@ struct Array[T: AnyType]:
 
         return Self {data: data, size: size, cap: cap}
 
-    fn __getitem__(self: Self, i: Int) -> T:
+    fn __getitem__(borrowed self: Self, i: Int) raises -> T:
+        if i >= self.size:
+            raise Error("Index out of bounds")
+
         return self.data.load(i)
 
     fn __setitem__(self: Self, i: Int, item: T) raises:
@@ -174,7 +177,7 @@ struct HashTable[T: AnyType]:
 
                     self.put(item.key, item.value)
 
-    fn display(inout self: Self) -> String:
+    fn display(inout self: Self) raises -> String:
         var res: String = ""
         # use later for multiple levels (a hash table inside of a hash table)
         let indent = "  "

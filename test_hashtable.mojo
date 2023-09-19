@@ -4,7 +4,7 @@ from hashtable import hash_fn, Item, Array, HashTable
 from testing import assert_equal, assert_not_equal, assert_true, assert_false
 
 
-fn test_hash_fn() -> Bool:
+fn test_hash_fn() raises -> Bool:
     if assert_equal(hash_fn("test"), 2724192577743982107):
         print_no_newline(".")
     else:
@@ -26,7 +26,7 @@ fn test_hash_fn() -> Bool:
     return True
 
 
-fn test_item() -> Bool:
+fn test_item() raises -> Bool:
     let item = Item("foo", 1)
 
     if assert_equal(item.key, "foo"):
@@ -58,57 +58,49 @@ fn test_item() -> Bool:
     return True
 
 
-fn test_array() -> Bool:
-    try:
-        let arr = Array[Int](10)
+fn test_array() raises -> Bool:
+    let arr = Array[Int](10)
 
-        if assert_equal(arr.size, 10):
-            print_no_newline(".")
-        else:
-            print_no_newline("E")
-            return False
-
-        arr[0] = 10
-
-        if assert_equal(arr[0], 10):
-            print_no_newline(".")
-        else:
-            print_no_newline("E")
-            return False
-
-        let arr2 = Array[Int](10)
-
-        if assert_equal(arr2.size, 10):
-            print_no_newline(".")
-        else:
-            print_no_newline("E")
-            return False
-
-        arr2[0] = 11
-
-        if assert_equal(arr2[0], 11):
-            print_no_newline(".")
-        else:
-            print_no_newline("E")
-            return False
-
-        return True
-    except:
+    if assert_equal(arr.size, 10):
+        print_no_newline(".")
+    else:
         print_no_newline("E")
         return False
 
+    arr[0] = 10
 
-fn test_hashtable() -> Bool:
+    if assert_equal(arr[0], 10):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    let arr2 = Array[Int](10)
+
+    if assert_equal(arr2.size, 10):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    arr2[0] = 11
+
+    if assert_equal(arr2[0], 11):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    return True
+
+
+fn test_hashtable() raises -> Bool:
     var hash_table: HashTable[Int]
 
-    try:
-        hash_table = HashTable[Int](10)
+    hash_table = HashTable[Int](10)
 
-        hash_table.put("time", 123)
-        hash_table.put("time2", 456)
-    except:
-        print_no_newline("E")
-        return False
+    hash_table.put("time", 123)
+    hash_table.put("time2", 456)
 
     if assert_equal(hash_table.table[8][0].value, 123):
         print_no_newline(".")
@@ -134,22 +126,18 @@ fn test_hashtable() -> Bool:
         print_no_newline("E")
         return False
 
-    try:
-        if assert_equal(hash_table.get("time"), 123):
-            print_no_newline(".")
-        else:
-            print_no_newline("E")
-            return False
-    except:
+    if assert_equal(hash_table.get("time"), 123):
+        print_no_newline(".")
+    else:
         print_no_newline("E")
         return False
 
     return True
 
 
-fn main():
+fn main() raises:
     var passed = 0
-    var test_fns = DynamicVector[fn () -> Bool]()
+    var test_fns = DynamicVector[fn () raises -> Bool]()
 
     test_fns.push_back(test_hash_fn)
     test_fns.push_back(test_item)
