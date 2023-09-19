@@ -27,7 +27,7 @@ fn test_hash_fn() -> Bool:
 
 
 fn test_item() -> Bool:
-    let item = Item("foo", rebind[AnyType](1))
+    let item = Item("foo", 1)
 
     if assert_equal(item.key, "foo"):
         print_no_newline(".")
@@ -35,17 +35,15 @@ fn test_item() -> Bool:
         print_no_newline("E")
         return False
 
-    if assert_equal(rebind[Int](item.value), 1):
+    if assert_equal(item.value, 1):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    let item2 = Item("foo", rebind[AnyType](1))
+    let item2 = Item("foo", 1)
 
-    if assert_true(
-        rebind[Int](item.value) == rebind[Int](item2.value), "Items should be equal"
-    ):
+    if assert_true(item.value == item2.value, "Items should be equal"):
         print_no_newline(".")
     else:
         print_no_newline("E")
@@ -100,12 +98,7 @@ fn test_hashtable() -> Bool:
     var hash_table = HashTable[Int](10)
 
     hash_table.put("time", 123)
-    hash_table.put("time2", 123)
-
-    try:
-        hash_table.display()
-    except e:
-        print(e.value)
+    hash_table.put("time2", 456)
 
     if assert_equal(hash_table.table[8][0].value, 123):
         print_no_newline(".")
@@ -125,9 +118,19 @@ fn test_hashtable() -> Bool:
         print_no_newline("E")
         return False
 
-    if assert_true(True == False, "TODO: Fix put and get and all methods on hashtable"):
+    if assert_equal(hash_table.table[6][0].value, 456):
         print_no_newline(".")
     else:
+        print_no_newline("E")
+        return False
+
+    try:
+        if assert_equal(hash_table.get("time"), 123):
+            print_no_newline(".")
+        else:
+            print_no_newline("E")
+            return False
+    except e:
         print_no_newline("E")
         return False
 
@@ -135,41 +138,23 @@ fn test_hashtable() -> Bool:
 
 
 fn main():
-    let total_tests = 4
     var passed = 0
-    var failed_tests = DynamicVector[StringRef]()
+    var test_fns = DynamicVector[fn () -> Bool]()
 
-    if test_hash_fn():
-        passed += 1
+    test_fns.push_back(test_hash_fn)
+    test_fns.push_back(test_item)
+    test_fns.push_back(test_array)
+    test_fns.push_back(test_hashtable)
+
+    let total_tests = len(test_fns)
+
+    for i in range(total_tests):
+        if test_fns[i]():
+            passed += 1
+
+    if passed == total_tests:
+        print("\nAll tests passed!")
     else:
-        failed_tests.push_back("test_fn")
-
-    if test_item():
-        passed += 1
-    else:
-        failed_tests.push_back("test_item")
-
-    if test_array():
-        passed += 1
-    else:
-        failed_tests.push_back("test_array")
-
-    if test_hashtable():
-        passed += 1
-    else:
-        failed_tests.push_back("test_hashtable")
-
-    print("")
-
-    if passed != total_tests:
-        print_no_newline("\nSome tests failed: ")
-
-    for i in range(len(failed_tests)):
-        print_no_newline(failed_tests[i])
-
-        if i == len(failed_tests) - 1:
-            print("")
-        else:
-            print_no_newline(", ")
+        print("\nSome tests failed.")
 
     print("\nPassed", passed, "of", total_tests, "tests.")

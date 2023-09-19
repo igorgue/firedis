@@ -16,7 +16,7 @@ struct Item[T: AnyType]:
     var key: StringRef
     var value: T
 
-    fn __init__(key: StringRef, value: T) -> Item[T]:
+    fn __init__(key: StringRef, value: T) -> Self:
         return Self {key: key, value: value}
 
     fn __eq__(self, other: None) -> Bool:
@@ -32,7 +32,7 @@ struct Array[T: AnyType]:
     var size: Int
     var cap: Int
 
-    fn __init__(size: Int) -> Array[T]:
+    fn __init__(size: Int) -> Self:
         let cap = size * 2
         let data = Pointer[T].alloc(cap)
 
@@ -63,18 +63,19 @@ struct Array[T: AnyType]:
         self.cap = new_cap
 
 
+@register_passable("trivial")
 struct HashTable[T: AnyType]:
     var size: Int
     var table: Array[Array[Item[T]]]
     var count: Int
 
-    fn __init__(inout self: Self, size: Int):
-        self.size = size
-        self.count = 0
-        self.table = Array[Array[Item[T]]](size)
+    fn __init__(size: Int) -> Self:
+        let table = Array[Array[Item[T]]](size)
 
         for i in range(size):
-            self.table[i] = Array[Item[T]](0)
+            table[i] = Array[Item[T]](0)
+
+        return Self {size: size, table: table, count: 0}
 
     fn hash_function(self, key: StringRef) -> Int:
         return hash_fn(key) % self.size
@@ -96,15 +97,15 @@ struct HashTable[T: AnyType]:
         if self.count > self.size:
             self.resize()
 
-    fn get(self: Self, key: StringRef) -> AnyType:
+    fn get(self: Self, key: StringRef) raises -> T:
         let hash_index = self.hash_function(key)
 
         for i in range(self.table[hash_index].size):
-            let item = rebind[Item[AnyType]](self.table[hash_index][i])
+            let item = self.table[hash_index][i]
             if item.key == key:
-                return item.value
+                return rebind[T](item.value)
 
-        return rebind[AnyType](None)
+        raise Error("Key not found")
 
     fn delete(inout self: Self, key: StringRef):
         let hash_index = self.hash_function(key)
@@ -132,8 +133,12 @@ struct HashTable[T: AnyType]:
 
                     self.put(item.key, item.value)
 
-    def display(inout self: Self) -> None:
-        print("\n*****************")
+    fn display(inout self: Self) -> String:
+        var res: String = ""
+        # use later for multiple levels (a hash table inside of a hash table)
+        let indent = "  "
+
+        res += "\n{\n"
 
         for i in range(self.size):
             let bucket = self.table[i]
@@ -141,7 +146,17 @@ struct HashTable[T: AnyType]:
             for j in range(bucket.size):
                 let item = bucket[j]
 
-                print_no_newline(item.key)
-                print(": ", rebind[Int](item.value))
+                res += indent
+                res += '"'
+                res += item.key
+                res += '"'
+                res += ": "
+                res += String(rebind[Int](item.value))
+                res += ","
+                res += "\n"
 
-        print("*****************")
+        res += "}"
+
+        print(res)
+
+        return res
