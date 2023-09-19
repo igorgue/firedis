@@ -59,13 +59,17 @@ fn test_item() -> Bool:
 
 
 fn test_array() -> Bool:
-    print("E")
-    print("test_array not implemented")
+    print_no_newline("E")
+    return False
+
+
+fn test_hashtable() -> Bool:
+    print_no_newline("E")
     return False
 
 
 fn main():
-    let total_tests = 1
+    let total_tests = 4
     var passed = 0
     var failed_tests = DynamicVector[StringRef]()
 
@@ -84,15 +88,22 @@ fn main():
     else:
         failed_tests.push_back("test_array")
 
+    if test_hashtable():
+        passed += 1
+    else:
+        failed_tests.push_back("test_hashtable")
+
     print("")
 
     if passed != total_tests:
         print_no_newline("\nSome tests failed: ")
 
     for i in range(len(failed_tests)):
-        print_no_newline(failed_tests[i], " ")
+        print_no_newline(failed_tests[i])
 
         if i == len(failed_tests) - 1:
             print("")
+        else:
+            print_no_newline(", ")
 
     print("\nPassed", passed, "of", total_tests, "tests.")
