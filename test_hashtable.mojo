@@ -119,6 +119,12 @@ fn test_hashtable() -> Bool:
         print_no_newline("E")
         return False
 
+    if assert_true(True == False, "TODO: Fix put and get and all methods on hashtable"):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
     return True
 
 
