@@ -59,46 +59,56 @@ fn test_item() -> Bool:
 
 
 fn test_array() -> Bool:
-    let arr = Array[Int](10)
+    try:
+        let arr = Array[Int](10)
 
-    if assert_equal(arr.size, 10):
-        print_no_newline(".")
-    else:
+        if assert_equal(arr.size, 10):
+            print_no_newline(".")
+        else:
+            print_no_newline("E")
+            return False
+
+        arr[0] = 10
+
+        if assert_equal(arr[0], 10):
+            print_no_newline(".")
+        else:
+            print_no_newline("E")
+            return False
+
+        let arr2 = Array[Int](10)
+
+        if assert_equal(arr2.size, 10):
+            print_no_newline(".")
+        else:
+            print_no_newline("E")
+            return False
+
+        arr2[0] = 11
+
+        if assert_equal(arr2[0], 11):
+            print_no_newline(".")
+        else:
+            print_no_newline("E")
+            return False
+
+        return True
+    except:
         print_no_newline("E")
         return False
-
-    arr[0] = 10
-
-    if assert_equal(arr[0], 10):
-        print_no_newline(".")
-    else:
-        print_no_newline("E")
-        return False
-
-    let arr2 = Array[Int](10)
-
-    if assert_equal(arr2.size, 10):
-        print_no_newline(".")
-    else:
-        print_no_newline("E")
-        return False
-
-    arr2[0] = 11
-
-    if assert_equal(arr2[0], 11):
-        print_no_newline(".")
-    else:
-        print_no_newline("E")
-        return False
-
-    return True
 
 
 fn test_hashtable() -> Bool:
-    var hash_table = HashTable[Int](10)
+    var hash_table: HashTable[Int]
 
-    hash_table.put("time", 123)
-    hash_table.put("time2", 456)
+    try:
+        hash_table = HashTable[Int](10)
+
+        hash_table.put("time", 123)
+        hash_table.put("time2", 456)
+    except:
+        print_no_newline("E")
+        return False
 
     if assert_equal(hash_table.table[8][0].value, 123):
         print_no_newline(".")
@@ -130,7 +140,7 @@ fn test_hashtable() -> Bool:
         else:
             print_no_newline("E")
             return False
-    except e:
+    except:
         print_no_newline("E")
         return False
 

@@ -1,6 +1,8 @@
 from math import abs
+from memory import memcmp
 
 
+@always_inline
 fn hash_fn(key: String) -> Int:
     var hash = 2166136261
 
@@ -22,9 +24,23 @@ struct Item[T: AnyType]:
     fn __eq__(self, other: None) -> Bool:
         return False
 
-    # FIXME: this is an error, cannot compare Ts
-    # fn __eq__(self, other: Item[T]) -> Bool:
-    #     return self.key == other.key and self.value == other.value
+    fn __eq__(self, other: Item[AnyType]) -> Bool:
+        return False
+
+    fn __eq__(self, other: Item[Bool]) -> Bool:
+        return self.key == other.key and rebind[Bool](self.value) == other.value
+
+    fn __eq__(self, other: Item[Int]) -> Bool:
+        return self.key == other.key and rebind[Int](self.value) == other.value
+
+    fn __eq__(self, other: Item[Float32]) -> Bool:
+        return self.key == other.key and rebind[Float32](self.value) == other.value
+
+    fn __eq__(self, other: Item[Float64]) -> Bool:
+        return self.key == other.key and rebind[Float64](self.value) == other.value
+
+    fn __eq__(self, other: Item[StringRef]) -> Bool:
+        return self.key == other.key and rebind[StringRef](self.value) == other.value
 
     fn set_value(inout self: Self, value: T):
         self.value = value
@@ -42,17 +58,38 @@ struct Array[T: AnyType]:
 
         return Self {data: data, size: size, cap: cap}
 
-    fn __getitem__(self, i: Int) -> T:
+    fn __getitem__(self: Self, i: Int) -> T:
         return self.data.load(i)
 
-    fn __setitem__(self, i: Int, value: T):
-        self.data.store(i, value)
+    fn __setitem__(self: Self, i: Int, item: T) raises:
+        if i >= self.size:
+            raise Error("Index out of bounds")
 
-    fn __ne__(self, other: None) -> Bool:
+        self.data.store(i, item)
+
+    fn __ne__(self: Self, other: None) -> Bool:
         return False
 
-    fn __ne__(self, other: Array[T]) -> Bool:
-        return not self.data == other.data
+    fn __ne__(self: Self, other: Array[Bool]) -> Bool:
+        return not rebind[Bool](self.data.load()) == other.data.load()
+
+    fn __ne__(self: Self, other: Array[Int]) -> Bool:
+        return not rebind[Int](self.data.load()) == other.data.load()
+
+    fn __ne__(self: Self, other: Array[StringRef]) -> Bool:
+        return not rebind[StringRef](self.data.load()) == other.data.load()
+
+    fn __ne__(self: Self, other: Array[Float32]) -> Bool:
+        return not rebind[Float32](self.data.load()) == other.data.load()
+
+    fn __ne__(self: Self, other: Array[Float64]) -> Bool:
+        return not rebind[Float64](self.data.load()) == other.data.load()
+
+    fn push_back(inout self: Self, item: T) raises:
+        if self.size >= self.cap:
+            self.resize(self.size + 1)
+
+        self.__setitem__(self.size, item)
 
     fn resize(inout self: Self, new_size: Int):
         let new_cap = new_size * 2
@@ -73,7 +110,7 @@ struct HashTable[T: AnyType]:
     var table: Array[Array[Item[T]]]
     var count: Int
 
-    fn __init__(size: Int) -> Self:
+    fn __init__(size: Int) raises -> Self:
         let table = Array[Array[Item[T]]](size)
 
         for i in range(size):
@@ -84,7 +121,7 @@ struct HashTable[T: AnyType]:
     fn hash_function(self, key: StringRef) -> Int:
         return hash_fn(key) % self.size
 
-    fn put(inout self: Self, key: StringRef, value: T):
+    fn put(inout self: Self, key: StringRef, value: T) raises:
         let hash_index = self.hash_function(key)
 
         for i in range(self.table[hash_index].size):
@@ -111,7 +148,7 @@ struct HashTable[T: AnyType]:
 
         raise Error("Key not found")
 
-    fn delete(inout self: Self, key: StringRef):
+    fn delete(inout self: Self, key: StringRef) raises:
         let hash_index = self.hash_function(key)
 
         for i in range(self.table[hash_index].size):
@@ -122,7 +159,7 @@ struct HashTable[T: AnyType]:
                 self.count -= 1
                 return
 
-    fn resize(inout self: Self):
+    fn resize(inout self: Self) raises:
         let old_table = self.table.data
         self.size *= 2
         self.table = Array[Array[Item[T]]](self.size)
