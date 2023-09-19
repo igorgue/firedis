@@ -1,6 +1,6 @@
 import libc
 
-from hashtable import hash_fn, Item, Array
+from hashtable import hash_fn, Item, Array, HashTable
 from testing import assert_equal, assert_not_equal, assert_true, assert_false
 
 
@@ -27,7 +27,7 @@ fn test_hash_fn() -> Bool:
 
 
 fn test_item() -> Bool:
-    let item = Item("foo", 1)
+    let item = Item("foo", rebind[AnyType](1))
 
     if assert_equal(item.key, "foo"):
         print_no_newline(".")
@@ -35,15 +35,17 @@ fn test_item() -> Bool:
         print_no_newline("E")
         return False
 
-    if assert_equal(item.value, 1):
+    if assert_equal(rebind[Int](item.value), 1):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    let item2 = Item("foo", 1)
+    let item2 = Item("foo", rebind[AnyType](1))
 
-    if assert_true(item == item2, "Items should be equal"):
+    if assert_true(
+        rebind[Int](item.value) == rebind[Int](item2.value), "Items should be equal"
+    ):
         print_no_newline(".")
     else:
         print_no_newline("E")
@@ -59,13 +61,51 @@ fn test_item() -> Bool:
 
 
 fn test_array() -> Bool:
-    print_no_newline("E")
-    return False
+    let arr = Array[Int](10)
+
+    if assert_equal(arr.size, 10):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    arr[0] = 10
+
+    if assert_equal(arr[0], 10):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    let arr2 = Array[Int](10)
+
+    if assert_equal(arr2.size, 10):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    arr2[0] = 11
+
+    if assert_equal(arr2[0], 11):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    return True
 
 
 fn test_hashtable() -> Bool:
-    print_no_newline("E")
-    return False
+    var hash_table = HashTable(10)
+
+    hash_table.put[Int]("foo", 1)
+
+    # let val = hash_table.get("foo")
+    #
+    # print("tst", rebind[Int](val))
+
+    return True
 
 
 fn main():

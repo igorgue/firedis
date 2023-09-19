@@ -22,9 +22,6 @@ struct Item[T: AnyType]:
     fn __eq__(self, other: None) -> Bool:
         return False
 
-    fn __eq__[T: AnyType](self, other: Item[T]) -> Bool:
-        return self.key == other.key
-
 
 @register_passable("trivial")
 struct Array[T: AnyType]:
@@ -32,23 +29,17 @@ struct Array[T: AnyType]:
     var size: Int
     var cap: Int
 
-    fn __init__(size: Int, value: None) -> Array[T]:
+    fn __init__(size: Int) -> Array[T]:
         let cap = size * 2
         let data = Pointer[T].alloc(cap)
-
-        return Self {data: data, size: size, cap: cap}
-
-    fn __init__(size: Int, value: T) -> Array[T]:
-        let cap = size * 2
-        let data = Pointer[T].alloc(cap)
-
-        for i in range(size):
-            data.store(i, value)
 
         return Self {data: data, size: size, cap: cap}
 
     fn __getitem__(self, i: Int) -> T:
         return self.data.load(i)
+
+    fn __setitem__(self, i: Int, value: T):
+        self.data.store(i, value)
 
     fn __ne__(self, other: None) -> Bool:
         return False
@@ -65,12 +56,12 @@ struct HashTable:
     fn __init__(inout self: Self, size: Int):
         self.size = size
         self.count = 0
-        self.table = Array[Array[Item[AnyType]]](self.size, None)
+        self.table = Array[Array[Item[AnyType]]](self.size)
 
-    fn hash_function(self, key: String) -> Int:
+    fn hash_function(self, key: StringRef) -> Int:
         return hash_fn(key) % self.size
 
-    fn put(inout self: Self, key: StringRef, value: AnyType):
+    fn put[T: AnyType](inout self: Self, key: StringRef, value: T):
         if self.count >= self.size:
             self.resize()
 
@@ -79,7 +70,7 @@ struct HashTable:
             for i in range(len(self.table[hash_index].size)):
                 if self.table[hash_index][i].key == key:
                     var item = self.table[hash_index][i]
-                    item.value = value
+                    item.value = rebind[AnyType](value)
 
                     return
 
@@ -89,47 +80,47 @@ struct HashTable:
                 var item = items[i]
 
                 if item == None:
-                    item = Item[AnyType](key, value)
+                    item = Item(key, rebind[AnyType](value))
                     self.count += 1
                     return
 
             for i in range(self.table[hash_index].size):
                 var item = self.table[hash_index][i]
                 if item.key == key:
-                    item.value = value
+                    item.value = rebind[AnyType](value)
                     return
 
             self.table[hash_index].data.store(
-                self.table[hash_index].size, Item[AnyType](key, value)
+                self.table[hash_index].size, Item(key, rebind[AnyType](value))
             )
 
             self.count += 1
 
-        def get(self, key):
-            hash_index = self.hash_function(key)
+    fn get(self: Self, key: StringRef) -> AnyType:
+        let hash_index = self.hash_function(key)
 
-            for i in range(self.table[hash_index].size):
-                let item = self.table[hash_index][i]
-                if item.key == key:
-                    return item.value
+        for i in range(self.table[hash_index].size):
+            let item = rebind[Item[AnyType]](self.table[hash_index][i])
+            if item.key == key:
+                return item.value
 
-            return None
+        return rebind[AnyType](None)
 
-        def delete(self, key):
-            let hash_index = self.hash_function(key)
+    fn delete(inout self: Self, key: StringRef):
+        let hash_index = self.hash_function(key)
 
-            for i in range(self.table[hash_index].size):
-                let item = self.table[hash_index][i]
-                if item.key == key:
-                    self.table[hash_index][i].__del__()
+        for i in range(self.table[hash_index].size):
+            let item = self.table[hash_index][i]
+            if item.key == key:
+                self.table[hash_index][i] = rebind[Item[AnyType]](None)
 
-                    self.count -= 1
-                    return
+                self.count -= 1
+                return
 
     fn resize(inout self: Self):
         let old_table = self.table.data
         self.size *= 2
-        self.table = Array[Array[Item[AnyType]]](self.size, None)
+        self.table = Array[Array[Item[AnyType]]](self.size)
         self.count = 0
 
         for i in range(self.size):
