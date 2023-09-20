@@ -40,6 +40,24 @@ struct Item[T: AnyType]:
     fn __eq__(self, other: Item[StringRef]) -> Bool:
         return self.key == other.key and rebind[StringRef](self.value) == other.value
 
+    fn __ne__(self, other: None) -> Bool:
+        return True
+
+    fn __ne__(self, other: Item[Bool]) -> Bool:
+        return self.__eq__(other) == False
+
+    fn __ne__(self, other: Item[Int]) -> Bool:
+        return self.__eq__(other) == False
+
+    fn __ne__(self, other: Item[Float32]) -> Bool:
+        return self.__eq__(other) == False
+
+    fn __ne__(self, other: Item[Float64]) -> Bool:
+        return self.__eq__(other) == False
+
+    fn __ne__(self, other: Item[StringRef]) -> Bool:
+        return self.__eq__(other) == False
+
     fn set_value(inout self: Self, value: T):
         self.value = value
 
