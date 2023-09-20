@@ -25,9 +25,6 @@ struct Item[T: AnyType]:
     fn __eq__(self, other: None) -> Bool:
         return False
 
-    fn __eq__(self, other: Item[AnyType]) -> Bool:
-        return False
-
     fn __eq__(self, other: Item[Bool]) -> Bool:
         return self.key == other.key and rebind[Bool](self.value) == other.value
 
@@ -204,7 +201,22 @@ struct HashTable[T: AnyType]:
                 res += item.key
                 res += '"'
                 res += ": "
-                res += String(rebind[Int](item.value))
+
+                if T == Bool:
+                    res += String(rebind[Bool](item.value))
+                elif T == Float32:
+                    res += String(rebind[Float32](item.value))
+                elif T == Float64:
+                    res += String(rebind[Float64](item.value))
+                elif T == Int:
+                    res += String(rebind[Int](item.value))
+                elif T == StringRef:
+                    res += String(rebind[StringRef](item.value))
+                elif T == String:
+                    res += String(rebind[StringRef](item.value))
+                else:
+                    res += "???"
+
                 res += ","
                 res += "\n"
 
