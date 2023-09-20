@@ -1,7 +1,7 @@
 MOJO = mojo
 
 firedis:
-	@mojo build firedis.🔥
+	mojo build firedis.🔥
 	@mkdir -p bin
 	mv firedis bin/firedis
 
