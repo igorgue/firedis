@@ -1,3 +1,5 @@
+import libc
+
 from test_libc import test_ptr_to_string
 from test_hashtable import test_hash_fn, test_array, test_item, test_hashtable
 
@@ -27,5 +29,7 @@ fn main() raises:
 
     if passed == total_tests:
         print("All tests passed! 🔥")
+        libc.exit(0)
     else:
         print("Some tests failed! 🌊")
+        libc.exit(-1)

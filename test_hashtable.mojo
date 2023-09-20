@@ -133,28 +133,3 @@ fn test_hashtable() raises -> Bool:
         return False
 
     return True
-
-
-fn main() raises:
-    print("> test_hashtable.mojo:")
-
-    var passed = 0
-    var test_fns = DynamicVector[fn () raises -> Bool]()
-
-    test_fns.push_back(test_hash_fn)
-    test_fns.push_back(test_item)
-    test_fns.push_back(test_array)
-    test_fns.push_back(test_hashtable)
-
-    let total_tests = len(test_fns)
-
-    for i in range(total_tests):
-        if test_fns[i]():
-            passed += 1
-
-    if passed == total_tests:
-        print("\nAll tests passed! 🔥")
-    else:
-        print("\nSome tests failed.")
-
-    print("\nPassed", passed, "of", total_tests, "tests.")
