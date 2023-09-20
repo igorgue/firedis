@@ -11,7 +11,7 @@ run:
 
 .PHONY: clean
 clean:
-	rm firedis
+	rm bin/firedis
 
 .PHONY: test
 test:
