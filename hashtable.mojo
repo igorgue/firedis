@@ -40,10 +40,10 @@ struct Item[T: AnyType]:
     fn __eq__(self, other: Item[StringRef]) -> Bool:
         return self.key == other.key and rebind[StringRef](self.value) == other.value
 
-    fn __eq__(self, other: Item[String]) -> Bool:
-        return self.key == other.key and rebind[StringRef](self.value) == StringRef(
-            other.value, len(other.value)
-        )
+    # fn __eq__(self, other: Item[String]) -> Bool:
+    #     return self.key == other.key and rebind[StringRef](self.value) == StringRef(
+    #         other.value, len(other.value)
+    #     )
 
     fn __ne__(self, other: None) -> Bool:
         return True
@@ -63,8 +63,8 @@ struct Item[T: AnyType]:
     fn __ne__(self, other: Item[StringRef]) -> Bool:
         return self.__eq__(other) == False
 
-    fn __ne__(self, other: Item[String]) -> Bool:
-        return self.__eq__(other) == False
+    # fn __ne__(self, other: Item[String]) -> Bool:
+    #     return self.__eq__(other) == False
 
     fn set_value(inout self: Self, value: T):
         self.value = value
@@ -107,8 +107,8 @@ struct Array[T: AnyType]:
     fn __ne__(self: Self, other: Array[StringRef]) -> Bool:
         return not rebind[StringRef](self.data.load()) == other.data.load()
 
-    fn __ne__(self: Self, other: Array[String]) -> Bool:
-        return not rebind[StringRef](self.data.load()) == other.data.load()
+    # fn __ne__(self: Self, other: Array[String]) -> Bool:
+    #     return not rebind[StringRef](self.data.load()) == other.data.load()
 
     fn __ne__(self: Self, other: Array[Float32]) -> Bool:
         return not rebind[Float32](self.data.load()) == other.data.load()
