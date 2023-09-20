@@ -54,14 +54,14 @@ fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
                     break
 
                 let msg = c_charptr_to_string(buf, bytes_recv)
-                print("> recived message:", msg)
+                print("> received message:", msg)
 
                 let reply = reply_to_message(msg)
                 if send(new_sockfd, to_char_ptr(reply), len(reply), 0) == -1:
                     print("> failed to send reply:", reply)
                     break
 
-                print("> message sent succesfully:", reply)
+                print("> message sent successfully:", reply)
 
         parallelize[handle_messages](rt, workers)
 

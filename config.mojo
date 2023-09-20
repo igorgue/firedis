@@ -55,7 +55,7 @@ fn load_config() -> FiredisConfig:
         return FiredisConfig(max_clients, core_multiplier, workers, port, host)
     except e:
         print("> failed to start firedis:", e.value)
-        print("> error loading config, exiting...")
+        print("> error loading configuration, exiting...")
 
         exit(-1)
 
