@@ -93,52 +93,70 @@ fn test_array() raises -> Bool:
 
 
 fn test_hashtable() raises -> Bool:
-    var hash_table: HashTable[Int]
+    let hash_table_int: HashTable[Int]
 
-    hash_table = HashTable[Int](10)
+    hash_table_int = HashTable[Int](10)
 
-    hash_table.put("time", 123)
-    hash_table.put("time2", 456)
+    hash_table_int.put("time", 123)
+    hash_table_int.put("time2", 456)
 
-    if assert_equal(hash_table.table[8][0].value, 123):
+    if assert_equal(hash_table_int.table[8][0].value, 123):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    if assert_equal(hash_table.table[8].size, 1):
+    if assert_equal(hash_table_int.table[8].size, 1):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    if assert_equal(hash_table.table[8].cap, 2):
+    if assert_equal(hash_table_int.table[8].cap, 2):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    if assert_equal(hash_table.table[6][0].value, 456):
+    if assert_equal(hash_table_int.table[6][0].value, 456):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    if assert_equal(hash_table.get("time"), 123):
+    if assert_equal(hash_table_int.get("time"), 123):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    if assert_equal(hash_table["time"], 123):
+    if assert_equal(hash_table_int["time"], 123):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    hash_table["time"] = 321
+    hash_table_int["time"] = 321
 
-    if assert_equal(hash_table["time"], 321):
+    if assert_equal(hash_table_int["time"], 321):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    let hash_table_str: HashTable[StringRef]
+
+    hash_table_str["a"] = "a"
+    hash_table_str["b"] = "b"
+    hash_table_str["c"] = "c"
+
+    if assert_equal(hash_table_str["a"], "a"):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    if assert_equal(hash_table_str["b"], "b"):
         print_no_newline(".")
     else:
         print_no_newline("E")
