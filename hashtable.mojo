@@ -64,7 +64,7 @@ struct Array[T: AnyType]:
 
         return self.data.load(i)
 
-    fn __setitem__(self: Self, i: Int, item: T) raises:
+    fn __setitem__(borrowed self: Self, i: Int, item: T) raises:
         if i >= self.size:
             raise Error("Index out of bounds")
 

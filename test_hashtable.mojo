@@ -136,6 +136,8 @@ fn test_hashtable() raises -> Bool:
 
 
 fn main() raises:
+    print("> test_hashtable.mojo:")
+
     var passed = 0
     var test_fns = DynamicVector[fn () raises -> Bool]()
 
@@ -151,7 +153,7 @@ fn main() raises:
             passed += 1
 
     if passed == total_tests:
-        print("\nAll tests passed!")
+        print("\nAll tests passed! 🔥")
     else:
         print("\nSome tests failed.")
 

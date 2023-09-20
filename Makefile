@@ -2,14 +2,12 @@ MOJO = mojo
 
 firedis:
 	@mojo build firedis.🔥
+	@mkdir -p bin
+	mv firedis bin/firedis
 
 .PHONY: run
 run:
 	@mojo run firedis.🔥
-
-.PHONY: run.python
-run.python:
-	@python3 -m firedis
 
 .PHONY: clean
 clean:
@@ -17,6 +15,4 @@ clean:
 
 .PHONY: test
 test:
-	@for test in `ls test_*.mojo`; do \
-		$(MOJO) run $$test; \
-	done
+	@$(MOJO) run testrunner.mojo
