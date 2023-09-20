@@ -154,6 +154,12 @@ struct HashTable[T: AnyType]:
 
         raise Error("Key not found")
 
+    fn __getitem__(self: Self, key: StringRef) raises -> T:
+        return self.get(key)
+
+    fn __setitem__(inout self: Self, key: StringRef, value: T) raises:
+        self.put(key, value)
+
     fn delete(inout self: Self, key: StringRef) raises:
         let hash_index = self.hash_function(key)
 

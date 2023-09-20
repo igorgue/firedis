@@ -130,4 +130,18 @@ fn test_hashtable() raises -> Bool:
         print_no_newline("E")
         return False
 
+    if assert_equal(hash_table["time"], 123):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    hash_table["time"] = 321
+
+    if assert_equal(hash_table["time"], 321):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
     return True
