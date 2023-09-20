@@ -1,5 +1,3 @@
-import libc
-
 from hashtable import hash_fn, Item, Array, HashTable
 from testing import assert_equal, assert_not_equal, assert_true, assert_false
 

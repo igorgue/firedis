@@ -13,6 +13,7 @@ fn hash_fn(key: String) -> Int:
     return abs(hash)
 
 
+@value
 @register_passable("trivial")
 struct Item[T: AnyType]:
     var key: StringRef
@@ -46,6 +47,7 @@ struct Item[T: AnyType]:
         self.value = value
 
 
+@value
 @register_passable("trivial")
 struct Array[T: AnyType]:
     var data: Pointer[T]
@@ -107,6 +109,7 @@ struct Array[T: AnyType]:
         self.cap = new_cap
 
 
+@value
 @register_passable("trivial")
 struct HashTable[T: AnyType]:
     var size: Int
