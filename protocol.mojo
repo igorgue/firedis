@@ -1,7 +1,8 @@
 from math import isnan
 from math.limit import isinf
 
-import libc
+from libc import c_char
+from libc import c_charptr_to_string, to_char_ptr
 
 # redis tokens
 alias REDIS_CRLF = "\r\n"
@@ -27,7 +28,7 @@ struct FiredisParser:
     var result: String
 
     fn __init__(inout self: Self, msg: String):
-        let msg_ptr = libc.to_char_ptr(msg)
+        let msg_ptr = to_char_ptr(msg)
 
         self.start = msg_ptr
         self.current = msg_ptr
@@ -69,7 +70,7 @@ struct FiredisParser:
     fn make_msg(inout self: Self, header: String, msg: String) -> String:
         let msg_len = len(msg)
         let header_len = len(header)
-        let buf = Pointer[libc.c_char]().alloc(header_len + msg_len + 2)
+        let buf = Pointer[c_char]().alloc(header_len + msg_len + 2)
 
         buf.store(0, ord(header))
 
@@ -79,7 +80,7 @@ struct FiredisParser:
         buf.store(header_len + msg_len, ord(String(REDIS_CRLF.data())[0]))
         buf.store(header_len + msg_len + 1, ord(String(REDIS_CRLF.data())[1]))
 
-        return libc.c_charptr_to_string(buf, header_len + msg_len + 2)
+        return c_charptr_to_string(buf, header_len + msg_len + 2)
 
     fn make_string(inout self: Self, msg: String) -> String:
         return self.make_msg(REDIS_STRING, msg)
