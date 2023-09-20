@@ -1,15 +1,11 @@
-import libc
+from libc import exit
 
-from test_libc import test_ptr_to_string
 from test_hashtable import test_hash_fn, test_array, test_item, test_hashtable
 
 
 fn main() raises:
     var passed = 0
     var tests = DynamicVector[fn () raises -> Bool]()
-
-    # libc tests
-    tests.push_back(test_ptr_to_string)
 
     # hashtable tests
     tests.push_back(test_hash_fn)
@@ -29,7 +25,7 @@ fn main() raises:
 
     if passed == total_tests:
         print("All tests passed! 🔥")
-        libc.exit(0)
+        exit(0)
     else:
         print("Some tests failed! 🌊")
-        libc.exit(-1)
+        exit(-1)

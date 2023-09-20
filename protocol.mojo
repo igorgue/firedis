@@ -67,77 +67,89 @@ struct FiredisParser:
         self.current += 1
         return True
 
-    fn make_msg(inout self: Self, header: String, msg: String) -> String:
-        let msg_len = len(msg)
-        let header_len = len(header)
-        let buf = Pointer[c_char]().alloc(header_len + msg_len + 2)
 
-        buf.store(0, ord(header))
+fn make_msg(header: String, msg: String) -> String:
+    let msg_len = len(msg)
+    let header_len = len(header)
+    let buf = Pointer[c_char]().alloc(header_len + msg_len + 2)
 
-        for i in range(msg_len):
-            buf.store(header_len + i, ord(msg[i]))
+    buf.store(0, ord(header))
 
-        buf.store(header_len + msg_len, ord(String(REDIS_CRLF.data())[0]))
-        buf.store(header_len + msg_len + 1, ord(String(REDIS_CRLF.data())[1]))
+    for i in range(msg_len):
+        buf.store(header_len + i, ord(msg[i]))
 
-        return c_charptr_to_string(buf, header_len + msg_len + 2)
+    buf.store(header_len + msg_len, ord(String(REDIS_CRLF.data())[0]))
+    buf.store(header_len + msg_len + 1, ord(String(REDIS_CRLF.data())[1]))
 
-    fn make_string(inout self: Self, msg: String) -> String:
-        return self.make_msg(REDIS_STRING, msg)
+    return c_charptr_to_string(buf, header_len + msg_len + 2)
 
-    fn make_error(inout self: Self, msg: String) -> String:
-        return self.make_msg(REDIS_ERROR, msg)
 
-    fn make_integer(inout self: Self, msg: Int) -> String:
-        return self.make_msg(REDIS_INTEGER, String(msg))
+fn make_string(msg: String) -> String:
+    return make_msg(REDIS_STRING, msg)
 
-    fn make_bulk_string(inout self: Self, msg: String) -> String:
-        let header: String
 
-        if not msg:
-            header = REDIS_BULK_STRING + "-1" + REDIS_CRLF
+fn make_error(msg: String) -> String:
+    return make_msg(REDIS_ERROR, msg)
+
+
+fn make_integer(msg: Int) -> String:
+    return make_msg(REDIS_INTEGER, String(msg))
+
+
+fn make_bulk_string(msg: String) -> String:
+    let header: String
+
+    if not msg:
+        header = REDIS_BULK_STRING + "-1" + REDIS_CRLF
+    else:
+        header = REDIS_BULK_STRING + String(len(msg)) + REDIS_CRLF
+
+    return make_msg(header, msg)
+
+
+fn make_array(msgs: VariadicList[String]) -> String:
+    let msgs_len = len(msgs)
+    let header = REDIS_ARRAY + String(msgs_len) + REDIS_CRLF
+    var result: String = ""
+
+    for msg in range(msgs_len):
+        result += msg
+
+    return make_msg(header, result)
+
+
+fn make_array(msgs: None) -> String:
+    let header = REDIS_ARRAY + "-1"
+
+    return make_msg(header, "")
+
+
+fn make_null() -> String:
+    return make_msg(REDIS_NULL, "")
+
+
+fn make_bool(msg: Bool) -> String:
+    if msg:
+        return make_msg(REDIS_BOOL, "t")
+    else:
+        return make_msg(REDIS_BOOL, "f")
+
+
+fn make_double(msg: None) -> String:
+    return make_msg(REDIS_DOUBLE, "nan")
+
+
+fn make_double(msg: Float32) -> String:
+    if isnan(msg):
+        return make_msg(REDIS_DOUBLE, "nan")
+    elif isinf(msg):
+        if msg > 0:
+            return make_msg(REDIS_DOUBLE, "inf")
         else:
-            header = REDIS_BULK_STRING + String(len(msg)) + REDIS_CRLF
+            return make_msg(REDIS_DOUBLE, "-inf")
+    else:
+        return make_msg(REDIS_DOUBLE, String(msg))
 
-        return self.make_msg(header, msg)
 
-    fn make_array(inout self: Self, msgs: VariadicList[String]) -> String:
-        let msgs_len = len(msgs)
-        let header = REDIS_ARRAY + String(msgs_len) + REDIS_CRLF
-        var result: String = ""
-
-        for msg in range(msgs_len):
-            result += msg
-
-        return self.make_msg(header, result)
-
-    fn make_array(inout self: Self, msgs: None) -> String:
-        let header = REDIS_ARRAY + "-1"
-
-        return self.make_msg(header, "")
-
-    fn make_null(inout self: Self) -> String:
-        return self.make_msg(REDIS_NULL, "")
-
-    fn make_bool(inout self: Self, msg: Bool) -> String:
-        if msg:
-            return self.make_msg(REDIS_BOOL, "t")
-        else:
-            return self.make_msg(REDIS_BOOL, "f")
-
-    fn make_double(inout self: Self, msg: None) -> String:
-        return self.make_msg(REDIS_DOUBLE, "nan")
-
-    fn make_double(inout self: Self, msg: Float32) -> String:
-        if isnan(msg):
-            return self.make_msg(REDIS_DOUBLE, "nan")
-        elif isinf(msg):
-            if msg > 0:
-                return self.make_msg(REDIS_DOUBLE, "inf")
-            else:
-                return self.make_msg(REDIS_DOUBLE, "-inf")
-        else:
-            return self.make_msg(REDIS_DOUBLE, String(msg))
-
-    fn make_big_integer(inout self: Self, msg: Int64) -> String:
-        return self.make_msg(REDIS_BIG_NUMBER, String(msg))
+fn make_big_integer(msg: Int64) -> String:
+    return make_msg(REDIS_BIG_NUMBER, String(msg))

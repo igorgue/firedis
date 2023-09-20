@@ -1,4 +1,4 @@
-import libc
+from libc import exit
 
 from algorithm import num_cores
 from os import getenv
@@ -57,6 +57,6 @@ fn load_config() -> FiredisConfig:
         print("> failed to start firedis:", e.value)
         print("> error loading config, exiting...")
 
-        libc.exit(-1)
+        exit(-1)
 
         return FiredisConfig(-1, -1, -1, 0, "")

@@ -2,7 +2,7 @@ from sys.info import sizeof
 from runtime.llcl import Runtime
 from algorithm import parallelize, num_cores
 
-from protocol import FiredisParser
+from protocol import FiredisParser, make_string
 
 from libc import AF_INET, AF_INET6, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, SHUT_RDWR
 from libc import c_char, c_int, c_uint, c_void
@@ -31,9 +31,9 @@ from config import load_config
 
 
 fn reply_to_message(msg: String) -> String:
-    var parser = FiredisParser(msg)
+    _ = FiredisParser(msg)
 
-    return parser.make_string("PONG")
+    return make_string("PONG")
 
 
 fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
