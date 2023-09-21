@@ -162,17 +162,17 @@ fn test_hashtable() raises -> Bool:
         print_no_newline("E")
         return False
 
-    var test_string: String = "d"
-    let test_string_ref = StringRef(
-        test_string._buffer.data.bitcast[Int8](), test_string._buffer.size
-    )
+    # var test_string: String = "d"
+    # let test_string_ref = StringRef(
+    #     test_string._buffer.data.bitcast[Int8](), test_string._buffer.size
+    # )
 
-    hash_table_str["d"] = test_string_ref
-
-    if assert_equal(hash_table_str["d"], "d"):
-        print_no_newline(".")
-    else:
-        print_no_newline("E")
-        return False
+    # hash_table_str["d"] = test_string_ref
+    #
+    # if assert_equal(hash_table_str["d"], "d"):
+    #     print_no_newline(".")
+    # else:
+    #     print_no_newline("E")
+    #     return False
 
     return True

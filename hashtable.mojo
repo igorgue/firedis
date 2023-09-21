@@ -170,13 +170,24 @@ struct HashTable[T: AnyType]:
         if self.count > self.size:
             self.resize()
 
+    fn contains(self: Self, key: StringRef) raises -> Bool:
+        if self.count == 0:
+            return False
+
+        let hash_index = self.hash_function(key)
+
+        for i in range(self.table[hash_index].size):
+            if self.table[hash_index][i].key == key:
+                return True
+
+        return False
+
     fn get(self: Self, key: StringRef) raises -> T:
         let hash_index = self.hash_function(key)
 
         for i in range(self.table[hash_index].size):
-            let item = self.table[hash_index][i]
-            if item.key == key:
-                return rebind[T](item.value)
+            if self.table[hash_index][i].key == key:
+                return rebind[T](self.table[hash_index][i].value)
 
         raise Error("Key not found")
 
