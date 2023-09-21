@@ -1,5 +1,5 @@
 from math import abs
-from memory import memcmp
+from list_iterator import ListIterator
 
 
 @always_inline
@@ -115,6 +115,9 @@ struct Array[T: AnyType]:
 
     fn __ne__(self: Self, other: Array[Float64]) -> Bool:
         return not rebind[Float64](self.data.load()) == other.data.load()
+
+    fn __iter__(self) -> ListIterator[T]:
+        return ListIterator[T](self.data, self.size)
 
     fn push_back(inout self: Self, item: T) raises:
         if self.size >= self.cap:
