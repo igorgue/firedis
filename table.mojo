@@ -11,7 +11,7 @@ struct Table:
     var floats: HashTable[Float32]
     var strs: HashTable[StringRef]
 
-    fn __init__(inout self: Self) raises -> Self:
+    fn __init__() raises -> Self:
         return Self {
             bools: HashTable[Bool](INIT_SIZE),
             ints: HashTable[Int](INIT_SIZE),
@@ -19,7 +19,7 @@ struct Table:
             strs: HashTable[StringRef](INIT_SIZE),
         }
 
-    fn __init__(inout self: Self, size: Int) raises -> Self:
+    fn __init__(size: Int) raises -> Self:
         return Self {
             bools: HashTable[Bool](size),
             ints: HashTable[Int](size),
@@ -118,3 +118,22 @@ struct Table:
             return True
         except e:
             return False
+
+    fn to_string(inout self: Self) raises -> String:
+        var res: String = "\n{\n"
+
+        res += self.bools._to_string_attrs()
+        res += "\n"
+        res += self.ints._to_string_attrs()
+        res += "\n"
+        res += self.floats._to_string_attrs()
+        res += "\n"
+        res += self.strs._to_string_attrs()
+        res += "\n"
+
+        res += "}"
+
+        return res
+
+    fn print(inout self: Self) raises:
+        print(self.to_string())

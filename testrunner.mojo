@@ -1,6 +1,7 @@
 from libc import exit
 
 from test_hashtable import test_hash_fn, test_array, test_item, test_hashtable
+from test_table import test_table_with_many_types
 
 
 fn main() raises:
@@ -13,13 +14,16 @@ fn main() raises:
     tests.push_back(test_item)
     tests.push_back(test_item)
 
+    # table tests
+    tests.push_back(test_table_with_many_types)
+
     let total_tests = len(tests)
 
     for i in range(total_tests):
         if tests[i]():
             passed += 1
 
-    print("\n")
+    put_new_line()
 
     # TODO: figure out how to show the test name
 
