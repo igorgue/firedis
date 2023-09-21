@@ -33,10 +33,7 @@ struct FiredisParser:
         self.size = len(msg)
         self.result = ""
 
-    fn parse(inout self: Self):
-        if self.msg[0] != REDIS_ARRAY:
-            return
-
+    fn parse(inout self: Self) raises:
         var i = 1
 
         var len_str: String = ""
@@ -46,26 +43,27 @@ struct FiredisParser:
                 break
             i += 1
 
-        let size: Int
-
-        try:
-            size = atol(len_str)
-        except:
-            return
-
-        print("REDIS_ARRAY size:", size)
+        let size: Int = atol(len_str)
 
         var strings = DynamicVector[String]()
         i += 2
 
         for n in range(size):
-            var j = i  # puts us after the size part
+            i += 1
+            var j = i
+            var msg_size_str: String = ""
             while j < self.size:
                 if self.msg[j] == REDIS_CRLF[0] and self.msg[j + 1] == REDIS_CRLF[1]:
-                    let x = self.msg[i:j]
+                    msg_size_str = self.msg[i:j]
                     break
 
                 j += 1
+            let msg_size = atol(msg_size_str)
+            j += 2
+            let msg = self.msg[j : j + msg_size]
+
+            # print("REDIS_ARRAY msg:", msg)
+            # print("REDIS_ARRAY msg_size:", msg_size)
 
         # print("COMMAND:", command)
 

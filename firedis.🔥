@@ -33,7 +33,10 @@ from config import load_config
 fn reply_to_message(msg: String) -> String:
     var parser = FiredisParser(msg)
 
-    parser.parse()
+    try:
+        parser.parse()
+    except e:
+        print("> failed to parse message:", e.value)
 
     return parser.result
 
