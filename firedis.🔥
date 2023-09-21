@@ -31,9 +31,11 @@ from config import load_config
 
 
 fn reply_to_message(msg: String) -> String:
-    _ = FiredisParser(msg)
+    var parser = FiredisParser(msg)
 
-    return make_string("PONG")
+    parser.parse()
+
+    return parser.result
 
 
 fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
