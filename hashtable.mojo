@@ -83,6 +83,20 @@ struct Array[T: AnyType]:
 
         return Self {data: data, size: size, cap: cap}
 
+    fn __init__[
+        *Ts: AnyType
+    ](inout self, owned other_list: ListLiteral[Ts]) raises -> Self:
+        let other_list_len = len(other_list)
+        let size = 0
+        let cap = other_list_len * 2
+        let data = Pointer[T].alloc(self.cap)
+        let src = Pointer.address_of(other_list).bitcast[T]()
+
+        for i in range(other_list_len):
+            self.push_back(src.load(i))
+
+        return Self {data: data, size: size, cap: cap}
+
     fn __getitem__(borrowed self: Self, i: Int) raises -> T:
         if i > self.size:
             raise Error("Index out of bounds")
@@ -119,11 +133,18 @@ struct Array[T: AnyType]:
     fn __iter__(self) -> ListIterator[T]:
         return ListIterator[T](self.data, self.size)
 
+    fn __len__(borrowed self) -> Int:
+        return self.size
+
     fn push_back(inout self: Self, item: T) raises:
         if self.size >= self.cap:
             self.resize(self.size + 1)
 
         self.__setitem__(self.size, item)
+        self.size += 1
+
+    fn append(inout self: Self, item: T) raises:
+        self.push_back(item)
 
     fn resize(inout self: Self, new_size: Int):
         let new_cap = new_size * 2
@@ -136,6 +157,15 @@ struct Array[T: AnyType]:
         self.data = new_data
         self.size = new_size
         self.cap = new_cap
+
+    fn remove_at(inout self, loc: Int) raises -> None:
+        if loc >= self.size:
+            raise Error("Index out of bounds")
+
+        for i in range(loc, self.size - 1):
+            self[i] = self[i + 1]
+
+        self.size -= 1
 
 
 @value

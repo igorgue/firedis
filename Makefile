@@ -15,4 +15,4 @@ clean:
 
 .PHONY: test
 test:
-	@$(MOJO) run testrunner.mojo
+	@$(MOJO) run test.mojo

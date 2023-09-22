@@ -89,6 +89,33 @@ fn test_array() raises -> Bool:
         print_no_newline("E")
         return False
 
+    let arr3 = Array[Int](10)
+    arr3[0] = 1
+    arr3[1] = 2
+    arr3[2] = 3
+    arr3[3] = 4
+    arr3[4] = 5
+    arr3[5] = 6
+    arr3[6] = 7
+    arr3[7] = 8
+    arr3[8] = 9
+    arr3[9] = 10
+
+    if assert_equal(arr3.size, 10):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    var i = 1
+    for item in arr3:
+        if assert_equal(item, i):
+            print_no_newline(".")
+        else:
+            print_no_newline("E")
+            return False
+        i += 1
+
     return True
 
 
@@ -161,18 +188,5 @@ fn test_hashtable() raises -> Bool:
     else:
         print_no_newline("E")
         return False
-
-    # var test_string: String = "d"
-    # let test_string_ref = StringRef(
-    #     test_string._buffer.data.bitcast[Int8](), test_string._buffer.size
-    # )
-
-    # hash_table_str["d"] = test_string_ref
-    #
-    # if assert_equal(hash_table_str["d"], "d"):
-    #     print_no_newline(".")
-    # else:
-    #     print_no_newline("E")
-    #     return False
 
     return True
