@@ -4,6 +4,8 @@ from math.limit import isinf
 from libc import c_char
 from libc import c_charptr_to_string, to_char_ptr
 
+from dodgy import DodgyString
+
 # redis tokens
 alias REDIS_CRLF: String = "\r\n"
 alias REDIS_STRING = "+"
@@ -29,12 +31,13 @@ struct FiredisParser:
 
     fn __init__(inout self: Self, msg: String):
         let msg_ptr = to_char_ptr(msg)
+
         self.msg = msg
         self.size = len(msg)
         self.result = ""
 
     fn parse(inout self: Self) raises:
-        var i = 1
+        var i = 1  # skip REDIS_ARRAY char
 
         var len_str: String = ""
         while i < self.size:
@@ -45,29 +48,38 @@ struct FiredisParser:
 
         let size: Int = atol(len_str)
 
-        var strings = DynamicVector[String]()
-        i += 2
+        var strings = DynamicVector[DodgyString]()
+        i += 2  # skip REDIS_CRLF
+
+        self.result = make_msg(REDIS_STRING, "PONG")
 
         for n in range(size):
-            i += 1
+            i += 1  # skip REDIS_BULK_STRING char
             var j = i
             var msg_size_str: String = ""
+
             while j < self.size:
                 if self.msg[j] == REDIS_CRLF[0] and self.msg[j + 1] == REDIS_CRLF[1]:
                     msg_size_str = self.msg[i:j]
+                    j += 2  # skip REDIS_CRLF
+                    i += 2
                     break
 
                 j += 1
+
             let msg_size = atol(msg_size_str)
-            j += 2
-            let msg = self.msg[j : j + msg_size]
 
-            # print("REDIS_ARRAY msg:", msg)
-            # print("REDIS_ARRAY msg_size:", msg_size)
+            if msg_size == -1:
+                strings.push_back(DodgyString(""))
+            else:
+                let msg = self.msg[j : j + msg_size]
+                strings.push_back(DodgyString(msg))
 
-        # print("COMMAND:", command)
+            i += msg_size + 2 + 1
 
-        self.result = "+PONG" + REDIS_CRLF
+        for i in range(size):
+            print(i, ": ", strings[i].to_string())
+            # self.result += make_bulk_string(strings[i].to_string())
 
     # fn advance(inout self: Self) -> UInt8:
     #     self.current = self.current + 1

@@ -69,6 +69,22 @@ struct Item[T: AnyType]:
     fn set_value(inout self: Self, value: T):
         self.value = value
 
+    fn value_to_string(self: Self) raises -> String:
+        if T == Bool:
+            return String(rebind[Bool](self.value))
+        elif T == Float32:
+            return String(rebind[Float32](self.value))
+        elif T == Float64:
+            return String(rebind[Float64](self.value))
+        elif T == Int:
+            return String(rebind[Int](self.value))
+        elif T == StringRef:
+            return '"' + String(rebind[StringRef](self.value)) + '"'
+        elif T == String:
+            return '"' + String(rebind[StringRef](self.value)) + '"'
+        else:
+            return "???"
+
 
 @value
 @register_passable("trivial")
@@ -285,21 +301,11 @@ struct HashTable[T: AnyType]:
                 res += '"'
                 res += ": "
 
-                if T == Bool:
-                    res += String(rebind[Bool](item.value))
-                elif T == Float32:
-                    res += String(rebind[Float32](item.value))
-                elif T == Float64:
-                    res += String(rebind[Float64](item.value))
-                elif T == Int:
-                    res += String(rebind[Int](item.value))
-                elif T == StringRef:
-                    res += '"' + String(rebind[StringRef](item.value)) + '"'
-                elif T == String:
-                    res += '"' + String(rebind[StringRef](item.value)) + '"'
-                else:
-                    res += "???"
+                res += item.value_to_string()
 
                 res += ","
+
+                if j < bucket.size - 1:
+                    res += "\n"
 
         return res
