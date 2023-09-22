@@ -37,7 +37,9 @@ struct FiredisParser:
         self.result = ""
 
     fn parse(inout self: Self) raises:
-        print('> msg:"', self.msg, '"')
+        print_no_newline('\n> msg:"')
+        print_no_newline(self.msg)
+        print('"')
         var i = 1  # skip REDIS_ARRAY char
 
         var len_str: String = ""
@@ -56,8 +58,8 @@ struct FiredisParser:
         self.result = make_msg(REDIS_STRING, "PONG")
 
         for n in range(size):
-            print("> self.msg[i - 1]:", self.msg[i - 1])
-            print("> self.msg[i]:", self.msg[i])
+            # print("> self.msg[i - 1]:", self.msg[i - 1])
+            # print("> self.msg[i]:", self.msg[i])
             var j = i
             var msg_size_str: String = ""
 
@@ -70,7 +72,7 @@ struct FiredisParser:
 
                 j += 1
 
-            print("> n:", n, "msg_size_str:", msg_size_str)
+            # print("> n:", n, "msg_size_str:", msg_size_str)
 
             let msg_size = atol(msg_size_str)
 
