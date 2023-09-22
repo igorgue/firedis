@@ -37,24 +37,27 @@ struct FiredisParser:
         self.result = ""
 
     fn parse(inout self: Self) raises:
+        print('> msg:"', self.msg, '"')
         var i = 1  # skip REDIS_ARRAY char
 
         var len_str: String = ""
         while i < self.size:
             if self.msg[i] == REDIS_CRLF[0] and self.msg[i + 1] == REDIS_CRLF[1]:
                 len_str = self.msg[1:i]
+                i += 1
                 break
             i += 1
 
         let size: Int = atol(len_str)
 
         var strings = DynamicVector[DodgyString]()
-        i += 2  # skip REDIS_CRLF
+        i += 2 + 1  # skip REDIS_CRLF
 
         self.result = make_msg(REDIS_STRING, "PONG")
 
         for n in range(size):
-            i += 1  # skip REDIS_BULK_STRING char
+            print("> self.msg[i - 1]:", self.msg[i - 1])
+            print("> self.msg[i]:", self.msg[i])
             var j = i
             var msg_size_str: String = ""
 
@@ -67,6 +70,8 @@ struct FiredisParser:
 
                 j += 1
 
+            print("> n:", n, "msg_size_str:", msg_size_str)
+
             let msg_size = atol(msg_size_str)
 
             if msg_size == -1:
@@ -75,11 +80,13 @@ struct FiredisParser:
                 let msg = self.msg[j : j + msg_size]
                 strings.push_back(DodgyString(msg))
 
-            i += msg_size + 2 + 1
+            i += msg_size + 2 + 2
 
         for i in range(size):
-            print(i, ": ", strings[i].to_string())
+            print(i, ":", strings[i].to_string())
             # self.result += make_bulk_string(strings[i].to_string())
+
+        self.result = make_msg(REDIS_STRING, "PONG")
 
     # fn advance(inout self: Self) -> UInt8:
     #     self.current = self.current + 1
