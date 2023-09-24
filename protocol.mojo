@@ -136,6 +136,18 @@ fn make_msg(header: String, msg: String) -> String:
     return res
 
 
+# NOTE: how to do it with pointers
+# fn make_msg(header: String, msg: String) -> String:
+#     let res_len = len(header) + len(msg) + 2
+#     let ptr = Pointer[Int8]().alloc(res_len)
+#
+#     memcpy(ptr, header._buffer.data, len(header))
+#     memcpy(ptr.offset(len(header)), msg._buffer.data, len(msg))
+#     memcpy(ptr.offset(len(header) + len(msg)), REDIS_CRLF._buffer.data, 2)
+#
+#     return String(ptr, res_len)
+
+
 fn make_string(msg: String) -> String:
     return make_msg(REDIS_STRING, msg)
 
