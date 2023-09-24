@@ -110,7 +110,11 @@ struct FiredisParser:
 
             i = i + msg_len + 2 + n
 
+        # for i in range(len(strings)):
+        #     print("str: ", i + 1, strings[i + 1].to_string())
+
         var command = strings[0].to_string()
+        print("strings: ", strings[0].to_string())
         var args = DynamicVector[DodgyString]()
 
         for i in range(1, len(strings)):
@@ -119,7 +123,7 @@ struct FiredisParser:
         self.build_result(command, args)
 
     fn build_result(
-        inout self: Self, inout command: String, args: DynamicVector[DodgyString]
+        inout self: Self, inout command: String, inout args: DynamicVector[DodgyString]
     ):
         command = to_upper(command)
 

@@ -1,4 +1,6 @@
 from list_iterator import ListIterator
+from libc import strlen
+from memory import memcpy
 
 
 @value
@@ -36,10 +38,25 @@ struct DodgyString:
 
         return DodgyString(p, l)
 
-    # fn __iter__(self) -> ListIterator[Int]:
-    #     return ListIterator[Int](self.data, self.size)
+    fn __eq__(self, other: DodgyString) -> Bool:
+        if self.len != other.len:
+            return False
+
+        for i in range(self.len):
+            if self.data.load(i) != other.data.load(i):
+                return False
+
+        return True
+
+    fn __ne__(self, other: DodgyString) -> Bool:
+        return not self.__eq__(other)
+
+    fn __iter__(self) -> ListIterator[Int8]:
+        return ListIterator[Int8](self.data, self.len)
 
     fn to_string(self) -> String:
-        let s = String(self.data, self.len)
+        let ptr = Pointer[Int8]().alloc(self.len)
 
-        return s
+        memcpy(ptr, self.data, self.len)
+
+        return String(ptr, self.len)

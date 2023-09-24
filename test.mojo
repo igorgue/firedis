@@ -2,13 +2,17 @@ from libc import exit
 
 from test_hashtable import test_hash_fn, test_array, test_item, test_hashtable
 from test_table import test_table_with_many_types
-from test_protocol import test_parse
+from test_protocol import test_parse_ping, test_parse_echo
 from test_string_utils import test_to_upper, test_to_lower
 
 
 fn main() raises:
     var passed = 0
     var tests = DynamicVector[fn () raises -> Bool]()
+
+    # string utils
+    tests.push_back(test_to_upper)
+    tests.push_back(test_to_lower)
 
     # hashtable
     tests.push_back(test_hash_fn)
@@ -20,11 +24,8 @@ fn main() raises:
     tests.push_back(test_table_with_many_types)
 
     # protocol
-    tests.push_back(test_parse)
-
-    # string utils
-    tests.push_back(test_to_upper)
-    tests.push_back(test_to_lower)
+    tests.push_back(test_parse_ping)
+    tests.push_back(test_parse_echo)
 
     let total_tests = len(tests)
 
