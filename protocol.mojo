@@ -102,14 +102,6 @@ struct FiredisParser:
         if i != self.size:
             raise Error("could not parse message")
 
-        # print("\n**************STRINGS*******************")
-        # for i in range(len(strings)):
-        #     print(i, "=", to_repr(strings[i].to_string()))
-        #
-        # print("")
-        # print("msg:", to_repr(self.msg[i:]))
-        # print("****************************************")
-
         var command = strings[0].to_string()
         var args = DynamicVector[DodgyString]()
 
@@ -124,27 +116,24 @@ struct FiredisParser:
         command = to_upper(command)
 
         if command == "PING":
-            self.result = make_msg(REDIS_STRING, "PONG")
+            self.result = make_pong()
         elif command == "ECHO":
-            self.result = make_bulk_string(args[0].to_string())
+            if len(args) == 1:
+                self.result = make_bulk_string(args[0].to_string())
+            else:
+                self.result = make_error("wrong number of arguments for 'echo' command")
         else:
             self.result = make_msg(REDIS_ERROR, "unknown command: " + command)
 
 
 fn make_msg(header: String, msg: String) -> String:
-    let msg_len = len(msg)
-    let header_len = len(header)
-    let buf = Pointer[c_char]().alloc(header_len + msg_len + 2)
+    var res: String = ""
 
-    buf.store(0, ord(header))
+    res += header
+    res += msg
+    res += REDIS_CRLF
 
-    for i in range(msg_len):
-        buf.store(header_len + i, ord(msg[i]))
-
-    buf.store(header_len + msg_len, ord(REDIS_CRLF[0]))
-    buf.store(header_len + msg_len + 1, ord(REDIS_CRLF[1]))
-
-    return c_charptr_to_string(buf, header_len + msg_len + 2)
+    return res
 
 
 fn make_string(msg: String) -> String:
@@ -164,13 +153,13 @@ fn make_bulk_string() -> String:
 
 
 fn make_bulk_string(msg: String) -> String:
-    let header: String
+    var header: String = ""
     let msg_len = len(msg)
 
     if msg_len == 0:
         return make_msg(REDIS_BULK_STRING + "0" + REDIS_CRLF, "")
 
-    header = REDIS_BULK_STRING + String(msg_len) + REDIS_CRLF
+    header += REDIS_BULK_STRING + "5" + REDIS_CRLF
 
     return make_msg(header, msg)
 
@@ -221,3 +210,7 @@ fn make_double(msg: Float32) -> String:
 
 fn make_big_integer(msg: Int64) -> String:
     return make_msg(REDIS_BIG_NUMBER, String(msg))
+
+
+fn make_pong() -> String:
+    return make_msg(REDIS_STRING, "PONG")

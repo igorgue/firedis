@@ -19,8 +19,8 @@ fn test_parse_ping() raises -> Bool:
 
 
 fn test_parse_echo() raises -> Bool:
-    let msg = "*3\r\n$4\r\necho\r\n$5\r\nfirst\r\n$6\r\nsecond\r\n"
-    let resp = "+PONG\r\n"
+    let msg = "*2\r\n$4\r\necho\r\n$5\r\nfirst\r\n"
+    let resp = "$5\r\nfirst\r\n"
     var parser = FiredisParser(msg)
 
     parser.parse()
