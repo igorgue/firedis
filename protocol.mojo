@@ -74,6 +74,7 @@ struct FiredisParser:
 
     fn parse(inout self: Self) raises:
         var i = 1  # skip REDIS_ARRAY char
+
         var len_str: String = ""
         while i < self.size:
             if self.msg[i] == REDIS_CRLF[0] and self.msg[i + 1] == REDIS_CRLF[1]:
@@ -96,16 +97,16 @@ struct FiredisParser:
             while self.msg[j] != REDIS_CRLF[0] and self.msg[j + 1] != REDIS_CRLF[1]:
                 j += 1
 
-            let msg_size_str: String = self.msg[i:j]
+            let msg_len_str: String = self.msg[i:j]
 
-            let msg_size = atol(msg_size_str)
+            let msg_len = atol(msg_len_str)
 
             i += 3  # skip REDIS_CRLF chars
 
-            let msg = self.msg[i : i + msg_size]
+            let msg = self.msg[i : i + msg_len]
             strings.push_back(DodgyString(msg))
 
-            i = i + msg_size + 2 + n
+            i = i + msg_len + 2 + n
 
         let command = strings[0].to_string()
         var args = DynamicVector[DodgyString]()
