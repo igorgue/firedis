@@ -36,12 +36,44 @@ struct FiredisParser:
         self.size = len(msg)
         self.result = ""
 
-    fn parse(inout self: Self) raises:
-        print_no_newline('\n> msg:"')
-        print_no_newline(self.msg)
-        print('"')
-        var i = 1  # skip REDIS_ARRAY char
+    fn __repr__(inout self: Self) -> String:
+        var res: String = ""
 
+        for i in range(len(self.msg)):
+            if self.msg[i] == "\r":
+                res += "\\r"
+            elif self.msg[i] == "\n":
+                res += "\\n"
+            else:
+                res += self.msg[i]
+
+        return res
+
+    fn print_msg_debug(inout self: Self):
+        print("> msg:", self.__repr__())
+
+    fn print_msg_debug(inout self: Self, i: Int):
+        print("")
+        print(self.__repr__())
+
+        # print_no_newline("i:", i)
+        # print_no_newline(" =>", self.msg[i])
+
+        for j in range(i + 1):
+            if self.msg[j] == "\r":
+                print_no_newline(" ")
+            elif self.msg[j] == "\n":
+                print_no_newline(" ")
+            if self.msg[j] == self.msg[i]:
+                print_no_newline("^:", i, '=> "')
+                print_no_newline(self.msg[i])
+                print('"')
+                break
+
+            print_no_newline(" ")
+
+    fn parse(inout self: Self) raises:
+        var i = 1  # skip REDIS_ARRAY char
         var len_str: String = ""
         while i < self.size:
             if self.msg[i] == REDIS_CRLF[0] and self.msg[i + 1] == REDIS_CRLF[1]:
@@ -52,73 +84,46 @@ struct FiredisParser:
 
         let size: Int = atol(len_str)
 
-        var strings = DynamicVector[DodgyString]()
-        i += 2 + 1  # skip REDIS_CRLF
+        i += 1  # move after size
 
-        self.result = make_msg(REDIS_STRING, "PONG")
+        var strings = DynamicVector[DodgyString]()
 
         for n in range(size):
-            # print("> self.msg[i - 1]:", self.msg[i - 1])
-            # print("> self.msg[i]:", self.msg[i])
+            i += 1  # skip REDIS_BULK_STRING char
+
             var j = i
-            var msg_size_str: String = ""
 
-            while j < self.size:
-                if self.msg[j] == REDIS_CRLF[0] and self.msg[j + 1] == REDIS_CRLF[1]:
-                    msg_size_str = self.msg[i:j]
-                    j += 2  # skip REDIS_CRLF
-                    i += 2
-                    break
-
+            while self.msg[j] != REDIS_CRLF[0] and self.msg[j + 1] != REDIS_CRLF[1]:
                 j += 1
 
-            # print("> n:", n, "msg_size_str:", msg_size_str)
+            let msg_size_str: String = self.msg[i:j]
 
             let msg_size = atol(msg_size_str)
 
-            if msg_size == -1:
-                strings.push_back(DodgyString(""))
-            else:
-                let msg = self.msg[j : j + msg_size]
-                strings.push_back(DodgyString(msg))
+            i += 3  # skip REDIS_CRLF chars
 
-            i += msg_size + 2 + 2
+            let msg = self.msg[i : i + msg_size]
+            strings.push_back(DodgyString(msg))
 
-        for i in range(size):
-            print(i, ":", strings[i].to_string())
-            # self.result += make_bulk_string(strings[i].to_string())
+            i = i + msg_size + 2 + n
 
-        self.result = make_msg(REDIS_STRING, "PONG")
+        let command = strings[0].to_string()
+        var args = DynamicVector[DodgyString]()
 
-    # fn advance(inout self: Self) -> UInt8:
-    #     self.current = self.current + 1
-    #
-    #     return (self.current - 1).load()
-    #
-    # fn peek(inout self: Self) -> UInt8:
-    #     return self.current.load()
-    #
-    # fn peek_next(inout self: Self) -> UInt8:
-    #     return self.current[1]
-    #
-    # fn is_digit(inout self: Self, c: UInt8) -> Bool:
-    #     return c >= ord("0") and c <= ord("9")
-    #
-    # fn is_alpha(inout self: Self, c: UInt8) -> Bool:
-    #     return (c >= ord("a") and c <= ord("z")) or (c >= ord("A") and c <= ord("Z"))
-    #
-    # fn is_at_end(inout self: Self) -> Bool:
-    #     return self.current.load() == 0
-    #
-    # fn match_char(inout self: Self, c: UInt8) -> Bool:
-    #     if self.is_at_end():
-    #         return False
-    #
-    #     if self.current.load() != c:
-    #         return False
-    #
-    #     self.current += 1
-    #     return True
+        for i in range(1, len(strings)):
+            args.push_back(strings[i])
+
+        self.build_result(command, args)
+
+    fn build_result(
+        inout self: Self, command: String, args: DynamicVector[DodgyString]
+    ):
+        if command == "ping" or command == "PING":
+            self.result = make_msg(REDIS_STRING, "PONG")
+        elif command == "echo" or command == "ECHO":
+            self.result = make_msg(REDIS_STRING, "PONG")
+        else:
+            self.result = make_msg(REDIS_ERROR, "unknown command: " + command)
 
 
 fn make_msg(header: String, msg: String) -> String:
