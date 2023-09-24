@@ -4,6 +4,8 @@ from math.limit import isinf
 from libc import c_char
 from libc import c_charptr_to_string, to_char_ptr
 
+from string_utils import to_upper
+
 from dodgy import DodgyString
 
 # redis tokens
@@ -108,7 +110,7 @@ struct FiredisParser:
 
             i = i + msg_len + 2 + n
 
-        let command = strings[0].to_string()
+        var command = strings[0].to_string()
         var args = DynamicVector[DodgyString]()
 
         for i in range(1, len(strings)):
@@ -117,11 +119,14 @@ struct FiredisParser:
         self.build_result(command, args)
 
     fn build_result(
-        inout self: Self, command: String, args: DynamicVector[DodgyString]
+        inout self: Self, inout command: String, args: DynamicVector[DodgyString]
     ):
-        if command == "ping" or command == "PING":
+        # print("> command:", command)
+        # command = to_upper(command)
+
+        if command == "PING" or command == "ping":
             self.result = make_msg(REDIS_STRING, "PONG")
-        elif command == "echo" or command == "ECHO":
+        elif command == "ECHO" or command == "echo":
             self.result = make_msg(REDIS_STRING, "PONG")
         else:
             self.result = make_msg(REDIS_ERROR, "unknown command: " + command)
