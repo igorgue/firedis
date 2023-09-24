@@ -3,7 +3,12 @@ from libc import exit
 from test_hashtable import test_hash_fn, test_array, test_item, test_hashtable
 from test_table import test_table_with_many_types
 from test_protocol import test_parse_ping, test_parse_echo
-from test_string_utils import test_to_upper, test_to_lower
+from test_string_utils import (
+    test_to_upper,
+    test_to_lower,
+    test_to_repr,
+    test_to_string_ref,
+)
 
 
 fn main() raises:
@@ -13,6 +18,8 @@ fn main() raises:
     # string utils
     tests.push_back(test_to_upper)
     tests.push_back(test_to_lower)
+    tests.push_back(test_to_repr)
+    tests.push_back(test_to_string_ref)
 
     # hashtable
     tests.push_back(test_hash_fn)

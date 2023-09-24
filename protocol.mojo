@@ -4,7 +4,7 @@ from math.limit import isinf
 from libc import c_char
 from libc import c_charptr_to_string, to_char_ptr
 
-from string_utils import to_upper
+from string_utils import to_upper, to_repr
 
 from dodgy import DodgyString
 
@@ -39,17 +39,7 @@ struct FiredisParser:
         self.result = ""
 
     fn __repr__(inout self: Self) -> String:
-        var res: String = ""
-
-        for i in range(len(self.msg)):
-            if self.msg[i] == "\r":
-                res += "\\r"
-            elif self.msg[i] == "\n":
-                res += "\\n"
-            else:
-                res += self.msg[i]
-
-        return res
+        return to_repr(self.msg)
 
     fn print_msg_debug(inout self: Self):
         print("> msg:", self.__repr__())
@@ -94,6 +84,8 @@ struct FiredisParser:
         for n in range(size):
             i += 1  # skip REDIS_BULK_STRING char
 
+            print("self.msg[i:] =", to_repr(self.msg[i:]))
+
             var j = i
 
             while self.msg[j] != REDIS_CRLF[0] and self.msg[j + 1] != REDIS_CRLF[1]:
@@ -108,13 +100,14 @@ struct FiredisParser:
             let msg = self.msg[i : i + msg_len]
             strings.push_back(DodgyString(msg))
 
-            i = i + msg_len + 2 + n
+            i = i + msg_len + 2 + 1
 
+        # print("\n****************************************")
         # for i in range(len(strings)):
-        #     print("str: ", i + 1, strings[i + 1].to_string())
+        #     print("str: ", i, to_repr(strings[i].to_string()))
+        # print("****************************************")
 
         var command = strings[0].to_string()
-        print("strings: ", strings[0].to_string())
         var args = DynamicVector[DodgyString]()
 
         for i in range(1, len(strings)):
