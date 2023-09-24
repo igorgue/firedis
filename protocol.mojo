@@ -84,27 +84,30 @@ struct FiredisParser:
         for n in range(size):
             i += 1  # skip REDIS_BULK_STRING char
 
-            print("self.msg[i:] =", to_repr(self.msg[i:]))
-
             var j = i
 
             while self.msg[j] != REDIS_CRLF[0] and self.msg[j + 1] != REDIS_CRLF[1]:
                 j += 1
 
-            let msg_len_str: String = self.msg[i:j]
+            let msg_len = atol(self.msg[i:j])
 
-            let msg_len = atol(msg_len_str)
-
-            i += 3  # skip REDIS_CRLF chars
+            i += 2  # skip REDIS_CRLF chars
+            i += 1  # put i after REDIS_CRLF chars
 
             let msg = self.msg[i : i + msg_len]
             strings.push_back(DodgyString(msg))
 
-            i = i + msg_len + 2 + 1
+            i = i + msg_len + 2
 
-        # print("\n****************************************")
+        if i != self.size:
+            raise Error("could not parse message")
+
+        # print("\n**************STRINGS*******************")
         # for i in range(len(strings)):
-        #     print("str: ", i, to_repr(strings[i].to_string()))
+        #     print(i, "=", to_repr(strings[i].to_string()))
+        #
+        # print("")
+        # print("msg:", to_repr(self.msg[i:]))
         # print("****************************************")
 
         var command = strings[0].to_string()
