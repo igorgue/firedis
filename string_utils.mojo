@@ -1,30 +1,30 @@
+fn to_lower(s: String, slen: Int) -> String:
+    let ptr = Pointer[UInt8]().alloc(slen)
+
+    for i in range(slen):
+        if ord(s[i]) >= ord("A") and ord(s[i]) <= ord("Z"):
+            ptr.store(i, ord(s[i]) + 32)
+        else:
+            ptr.store(i, ord(s[i]))
+
+    return String(ptr.bitcast[Int8](), slen)
+
+
 fn to_lower(s: String) -> String:
-    var result: String = ""
+    return to_lower(s, len(s))
 
-    for i in range(len(s)):
-        var c = s[i]
 
-        if ord(c) >= ord("A") and ord(c) <= ord("Z"):
-            c = chr(ord(c) + 32)
+fn to_upper(s: String, slen: Int) -> String:
+    let ptr = Pointer[UInt8]().alloc(slen)
 
-        result += c
+    for i in range(slen):
+        if ord(s[i]) >= ord("a") and ord(s[i]) <= ord("z"):
+            ptr.store(i, ord(s[i]) - 32)
+        else:
+            ptr.store(i, ord(s[i]))
 
-    return result
+    return String(ptr.bitcast[Int8](), slen)
 
 
 fn to_upper(s: String) -> String:
-    var result: String = ""
-
-    for i in range(len(s)):
-        var c = s[i]
-
-        if ord(c) >= ord("a") and ord(c) <= ord("z"):
-            c = chr(ord(c) - 32)
-
-        print("c:", c)
-
-        result += c
-
-    print("'s:", "'" + s + "'", "result:", "'" + result + "'")
-
-    return result
+    return to_upper(s, len(s))

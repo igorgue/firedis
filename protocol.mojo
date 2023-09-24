@@ -121,13 +121,12 @@ struct FiredisParser:
     fn build_result(
         inout self: Self, inout command: String, args: DynamicVector[DodgyString]
     ):
-        # print("> command:", command)
-        # command = to_upper(command)
+        command = to_upper(command)
 
-        if command == "PING" or command == "ping":
+        if command == "PING":
             self.result = make_msg(REDIS_STRING, "PONG")
-        elif command == "ECHO" or command == "echo":
-            self.result = make_msg(REDIS_STRING, "PONG")
+        elif command == "ECHO":
+            self.result = make_bulk_string(args[0].to_string())
         else:
             self.result = make_msg(REDIS_ERROR, "unknown command: " + command)
 
@@ -160,13 +159,18 @@ fn make_integer(msg: Int) -> String:
     return make_msg(REDIS_INTEGER, String(msg))
 
 
+fn make_bulk_string() -> String:
+    return make_msg(REDIS_BULK_STRING + "-1", "")
+
+
 fn make_bulk_string(msg: String) -> String:
     let header: String
+    let msg_len = len(msg)
 
-    if not msg:
-        header = REDIS_BULK_STRING + "-1" + REDIS_CRLF
-    else:
-        header = REDIS_BULK_STRING + String(len(msg)) + REDIS_CRLF
+    if msg_len == 0:
+        return make_msg(REDIS_BULK_STRING + "0" + REDIS_CRLF, "")
+
+    header = REDIS_BULK_STRING + String(msg_len) + REDIS_CRLF
 
     return make_msg(header, msg)
 

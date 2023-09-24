@@ -15,7 +15,7 @@ fn test_parse() raises -> Bool:
         print_no_newline("E")
         return False
 
-    let msg2 = "*3\r\n$4\r\necho\r\n$12\r\nfirst string\r\n$13\r\nsecond string\r\n"
+    let msg2 = "*2\r\n$4\r\necho\r\n$5\r\nfirst\r\n"
     let resp2 = "+PONG\r\n"
     var parser2 = FiredisParser(msg2)
 

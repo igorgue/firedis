@@ -3,6 +3,7 @@ from libc import exit
 from test_hashtable import test_hash_fn, test_array, test_item, test_hashtable
 from test_table import test_table_with_many_types
 from test_protocol import test_parse
+from test_string_utils import test_to_upper, test_to_lower
 
 
 fn main() raises:
@@ -20,6 +21,10 @@ fn main() raises:
 
     # protocol
     tests.push_back(test_parse)
+
+    # string utils
+    tests.push_back(test_to_upper)
+    tests.push_back(test_to_lower)
 
     let total_tests = len(tests)
 
