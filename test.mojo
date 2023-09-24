@@ -15,23 +15,23 @@ fn main() raises:
     var passed = 0
     var tests = DynamicVector[fn () raises -> Bool]()
 
-    # # string utils
-    # tests.push_back(test_to_upper)
-    # tests.push_back(test_to_lower)
-    # tests.push_back(test_to_repr)
-    # tests.push_back(test_to_string_ref)
-    #
-    # # hashtable
-    # tests.push_back(test_hash_fn)
-    # tests.push_back(test_array)
-    # tests.push_back(test_item)
-    # tests.push_back(test_item)
-    #
-    # # table
-    # tests.push_back(test_table_with_many_types)
-    #
-    # # protocol
-    # tests.push_back(test_parse_ping)
+    # string utils
+    tests.push_back(test_to_upper)
+    tests.push_back(test_to_lower)
+    tests.push_back(test_to_repr)
+    tests.push_back(test_to_string_ref)
+
+    # hashtable
+    tests.push_back(test_hash_fn)
+    tests.push_back(test_array)
+    tests.push_back(test_item)
+    tests.push_back(test_item)
+
+    # table
+    tests.push_back(test_table_with_many_types)
+
+    # protocol
+    tests.push_back(test_parse_ping)
     tests.push_back(test_parse_echo)
 
     let total_tests = len(tests)
@@ -45,8 +45,8 @@ fn main() raises:
     # TODO: figure out how to show the test name
 
     if passed == total_tests:
-        print("All tests passed! 🔥")
+        print("\033[0;32mAll tests passed!\033[0;0m 🔥")
         exit(0)
     else:
-        print("Some tests failed! 🌊")
+        print("\033[0;31mSome tests failed!\033[0;0m 🌊")
         exit(-1)
