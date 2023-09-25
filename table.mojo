@@ -1,4 +1,4 @@
-from hashtable import HashTable
+from hashtable import HashTable, NOT_FOUND_ERROR
 from libc import exit
 
 alias INIT_SIZE: Int = 100
@@ -116,7 +116,7 @@ struct Table:
         try:
             value = self.strs[key]
 
-            return True
+            return value != NOT_FOUND_ERROR
         except e:
             return False
 

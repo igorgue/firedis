@@ -1,6 +1,8 @@
 from math import abs
 from list_iterator import ListIterator
 
+alias NOT_FOUND_ERROR = "NOT_FOUND"
+
 
 @always_inline
 fn hash_fn(key: String) -> Int:
@@ -238,7 +240,7 @@ struct HashTable[T: AnyType]:
             if self.table[hash_index][i].key == key:
                 return rebind[T](self.table[hash_index][i].value)
 
-        raise Error("Key not found")
+        raise Error(NOT_FOUND_ERROR)
 
     fn __getitem__(self: Self, key: StringRef) raises -> T:
         return self.get(key)
