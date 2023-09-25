@@ -171,7 +171,7 @@ fn make_bulk_string(msg: String) -> String:
     if msg_len == 0:
         return make_msg(REDIS_BULK_STRING + "0" + REDIS_CRLF, "")
 
-    header += REDIS_BULK_STRING + "5" + REDIS_CRLF
+    header += REDIS_BULK_STRING + String(msg_len) + REDIS_CRLF
 
     return make_msg(header, msg)
 

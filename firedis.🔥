@@ -2,6 +2,7 @@ from sys.info import sizeof
 from runtime.llcl import Runtime
 from algorithm import parallelize, num_cores
 
+from string_utils import to_repr
 from protocol import FiredisParser, make_string
 
 from libc import AF_INET, AF_INET6, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, SHUT_RDWR
@@ -60,14 +61,14 @@ fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
 
                 let msg = c_charptr_to_string(buf, bytes_recv)
 
-                # print("> received message:", msg)
+                print("> received message:", to_repr(msg))
 
                 let reply = reply_to_message(msg)
                 if send(new_sockfd, to_char_ptr(reply), len(reply), 0) == -1:
-                    print("> failed to send reply:", reply)
+                    print("> failed to send reply:", to_repr(reply))
                     break
 
-                print("> message sent successfully:", reply)
+                print("> message sent successfully:", to_repr(reply))
 
         parallelize[handle_messages](rt, workers)
 
