@@ -12,6 +12,7 @@ from libc import (
     accept,
     bind,
     c_charptr_to_string,
+    exit,
     htons,
     # inet_ntoa,
     inet_ntop,
@@ -43,7 +44,7 @@ fn reply_to_message(inout db: Table, msg: String) -> String:
     return parser.result
 
 
-fn respond_to_client(inout db: Table, new_sockfd: c_int, workers: Int) -> None:
+fn respond_to_client(inout db: Table, new_sockfd: c_int, workers: Int):
     with Runtime() as rt:
 
         @always_inline
@@ -74,7 +75,7 @@ fn respond_to_client(inout db: Table, new_sockfd: c_int, workers: Int) -> None:
         parallelize[handle_messages](rt, workers)
 
 
-fn wait_for_clients(inout db: Table, sockfd: c_int, workers: Int) -> None:
+fn wait_for_clients(inout db: Table, sockfd: c_int, workers: Int):
     print("> waiting for connections...")
 
     while True:
@@ -101,7 +102,7 @@ fn wait_for_clients(inout db: Table, sockfd: c_int, workers: Int) -> None:
             parallelize[handle_client](rt, workers)
 
 
-fn main() -> None:
+fn main():
     let config = load_config()
     var db = Table.create()
 

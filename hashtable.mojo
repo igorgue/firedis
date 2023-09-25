@@ -166,7 +166,7 @@ struct Array[T: AnyType]:
         self.size = new_size
         self.cap = new_cap
 
-    fn remove_at(inout self, index: Int) raises -> None:
+    fn remove_at(inout self, index: Int) raises:
         if index >= self.size:
             raise Error("Index out of bounds")
 
