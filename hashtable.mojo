@@ -22,10 +22,10 @@ fn hash_fn(key: String) -> Int:
 struct Item[T: AnyType]:
     var key: StringRef
     var value: T
-    var expires: Int  # expire in ms
+    var expire: Int  # expire in ms
 
     fn __init__(key: StringRef, value: T) -> Self:
-        return Self {key: key, value: value, expires: -1}
+        return Self {key: key, value: value, expire: -1}
 
     fn __eq__(self, other: None) -> Bool:
         return False
@@ -67,10 +67,10 @@ struct Item[T: AnyType]:
         self.value = value
 
     fn set_expire(inout self: Self, key: StringRef, expire: Int):
-        self.expires = expire
+        self.expire = expire
 
     fn is_expired(self: Self) -> Bool:
-        return self.expires != -1 and self.expires < now()
+        return self.expire != -1 and self.expire < (now() // 1_000_000)
 
     fn value_to_string(self: Self) raises -> String:
         if T == Bool:
@@ -137,9 +137,6 @@ struct Array[T: AnyType]:
 
     fn __ne__(self: Self, other: Array[StringRef]) -> Bool:
         return not rebind[StringRef](self.data.load()) == other.data.load()
-
-    # fn __ne__(self: Self, other: Array[String]) -> Bool:
-    #     return not rebind[StringRef](self.data.load()) == other.data.load()
 
     fn __ne__(self: Self, other: Array[Float32]) -> Bool:
         return not rebind[Float32](self.data.load()) == other.data.load()
@@ -209,6 +206,11 @@ struct HashTable[T: AnyType]:
         for i in range(self.data[hash_index].size):
             if self.data[hash_index][i].key == key:
                 self.data[hash_index][i].set_value(value)
+
+                self.count += 1
+                if self.count > self.size:
+                    self.resize()
+
                 return
 
         let item = Item[T](key, value)

@@ -164,7 +164,6 @@ struct Table:
             elif self.strs.contains(key):
                 self.strs.set_expire(key, value)
             else:
-                print("> error setting expire:", value)
                 return False
 
             return True
