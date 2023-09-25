@@ -129,17 +129,19 @@ struct FiredisParser:
             var key: StringRef = ""
             var value: StringRef = ""
 
-            if len(args) == 2:
-                key = args[0].to_string_ref()
-                value = args[1].to_string_ref()
-
-                if self.db.set(key, value):
-                    self.result = make_string("OK")
-                else:
-                    self.result = make_error("could not set value")
-
             if len(args) < 2:
                 self.result = make_error("wrong number of arguments for 'set' command")
+                return
+
+            key = args[0].to_string_ref()
+            value = args[1].to_string_ref()
+
+            if self.db.set(key, value):
+                self.result = make_string("OK")
+            else:
+                self.result = make_error("could not set value")
+
+            if len(args) == 2:
                 return
 
             for i in range(2, len(args), 2):
@@ -157,16 +159,17 @@ struct FiredisParser:
                     except:
                         self.result = make_error("invalid ex value")
                         return
-                # elif option_key == "PX":
-                #     let px = atol(option_value)
-                #     self.db.set_px(px)
-                # elif option_key == "NX":
-                #     self.db.set_nx()
-                # elif option_key == "XX":
-                #     self.db.set_xx()
-                # else:
-                #     self.result = make_error("unknown option: " + option_key)
-                #     return
+                if option_key == "PX":
+                    try:
+                        let ex = atol(option_value)
+                        if self.db.set_px(key, ex):
+                            self.result = make_string("OK")
+                        else:
+                            self.result = make_error("could not set px value")
+                            return
+                    except:
+                        self.result = make_error("invalid px value")
+                        return
 
         elif command == "DEL":
             if len(args) == 0:

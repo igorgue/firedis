@@ -22,7 +22,7 @@ fn hash_fn(key: String) -> Int:
 struct Item[T: AnyType]:
     var key: StringRef
     var value: T
-    var expires: Int  # expires in ms
+    var expires: Int  # expire in ms
 
     fn __init__(key: StringRef, value: T) -> Self:
         return Self {key: key, value: value, expires: -1}

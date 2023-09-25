@@ -150,27 +150,31 @@ struct Table:
     fn count(self: Self) -> Int:
         return self.bools.count + self.ints.count + self.floats.count + self.strs.count
 
-    fn set_ex(inout self: Self, key: StringRef, value: Int) -> Bool:
-        """Set expires in seconds."""
+    fn set_px(inout self: Self, key: StringRef, value: Int) -> Bool:
+        """Set expire in milliseconds."""
         let expire = (now() // 1_000_000) + value
 
         try:
             if self.bools.contains(key):
-                self.bools.set_expire(key, expire)
+                self.bools.set_expire(key, value)
             elif self.ints.contains(key):
-                self.ints.set_expire(key, expire)
+                self.ints.set_expire(key, value)
             elif self.floats.contains(key):
-                self.floats.set_expire(key, expire)
+                self.floats.set_expire(key, value)
             elif self.strs.contains(key):
-                self.strs.set_expire(key, expire)
+                self.strs.set_expire(key, value)
             else:
-                print("> error setting expire:", expire)
+                print("> error setting expire:", value)
                 return False
 
             return True
         except e:
             print("> error setting expire:", e.value)
             return False
+
+    fn set_ex(inout self: Self, key: StringRef, value: Int) -> Bool:
+        """Set expire in seconds."""
+        return self.set_px(key, value * 1_000)
 
     fn to_string(inout self: Self) raises -> String:
         var res: String = "\n{\n"
