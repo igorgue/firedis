@@ -4,7 +4,7 @@ from math.limit import isinf
 from libc import c_char
 from libc import c_charptr_to_string, to_char_ptr
 
-from string_utils import to_upper, to_repr, to_string_ref
+from string_utils import to_upper, to_repr
 from table import Table
 from libc import exit
 
@@ -118,7 +118,7 @@ struct FiredisParser:
                 self.result = make_error("wrong number of arguments for 'get' command")
                 return
 
-            let key = to_string_ref(args[0].to_string())
+            let key = args[0].to_string_ref()
             var value: StringRef = ""
 
             if self.db.get(key, value):
@@ -130,8 +130,8 @@ struct FiredisParser:
                 self.result = make_error("wrong number of arguments for 'set' command")
                 return
 
-            let key = to_string_ref(args[0].to_string())
-            let value = to_string_ref(args[1].to_string())
+            let key = args[0].to_string_ref()
+            let value = args[1].to_string_ref()
 
             if self.db.set(key, value):
                 self.result = make_string("OK")
@@ -144,7 +144,7 @@ struct FiredisParser:
 
             var count = 0
             for i in range(len(args)):
-                let key = to_string_ref(args[i].to_string())
+                let key = args[i].to_string_ref()
 
                 if self.db.delete(key):
                     count += 1
