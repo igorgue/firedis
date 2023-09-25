@@ -12,6 +12,20 @@ struct Table:
     var floats: HashTable[Float32]
     var strs: HashTable[StringRef]
 
+    @staticmethod
+    fn create() -> Table:
+        let table: Table
+
+        try:
+            table = Table()
+        except e:
+            print("> fatal error: could not init table")
+            exit(-1)
+
+            pass
+
+        return table
+
     fn __init__() raises -> Self:
         return Self {
             bools: HashTable[Bool](INIT_SIZE),
@@ -120,13 +134,13 @@ struct Table:
         except e:
             return False
 
-    fn get_string(inout self: Self, key: StringRef, inout value: StringRef) -> Bool:
-        try:
-            value = self.strs[key]
-
-            return value != NOT_FOUND_ERROR
-        except e:
-            return False
+    fn delete(inout self: Self, key: StringRef) raises -> Bool:
+        return (
+            self.bools.delete(key)
+            or self.ints.delete(key)
+            or self.floats.delete(key)
+            or self.strs.delete(key)
+        )
 
     fn to_string(inout self: Self) raises -> String:
         var res: String = "\n{\n"
@@ -144,19 +158,8 @@ struct Table:
 
         return res
 
-    @staticmethod
-    fn create() -> Table:
-        let table: Table
-
-        try:
-            table = Table()
-        except e:
-            print("> fatal error: could not init table")
-            exit(-1)
-
-            pass
-
-        return table
+    fn count(self: Self) -> Int:
+        return self.bools.count + self.ints.count + self.floats.count + self.strs.count
 
     fn print(inout self: Self) raises:
         print(self.to_string())

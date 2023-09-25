@@ -166,11 +166,11 @@ struct Array[T: AnyType]:
         self.size = new_size
         self.cap = new_cap
 
-    fn remove_at(inout self, loc: Int) raises -> None:
-        if loc >= self.size:
+    fn remove_at(inout self, index: Int) raises -> None:
+        if index >= self.size:
             raise Error("Index out of bounds")
 
-        for i in range(loc, self.size - 1):
+        for i in range(index, self.size - 1):
             self[i] = self[i + 1]
 
         self.size -= 1
@@ -238,16 +238,18 @@ struct HashTable[T: AnyType]:
     fn __setitem__(inout self: Self, key: StringRef, value: T) raises:
         self.set(key, value)
 
-    fn delete(inout self: Self, key: StringRef) raises:
+    fn delete(inout self: Self, key: StringRef) raises -> Bool:
         let hash_index = self.hash_function(key)
 
         for i in range(self.table[hash_index].size):
             let item = self.table[hash_index][i]
             if item.key == key:
-                self.table[hash_index][i] = rebind[Item[T]](None)
-
+                self.table[hash_index].remove_at(i)
                 self.count -= 1
-                return
+
+                return True
+
+        return False
 
     fn resize(inout self: Self) raises:
         let old_table = self.table.data

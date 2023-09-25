@@ -81,3 +81,29 @@ fn test_table_with_many_types() raises -> Bool:
         return False
 
     return True
+
+
+fn test_table_delete_items() raises -> Bool:
+    var table = Table()
+
+    _ = table.set("a", True)
+    _ = table.set("b", True)
+    _ = table.set("c", True)
+    _ = table.set("d", True)
+
+    _ = table.delete("a")
+
+    if assert_equal(table.count(), 3):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
+    var value = False
+    if table.get("a", value):
+        print_no_newline("E")
+        return False
+    else:
+        print_no_newline(".")
+
+    return True

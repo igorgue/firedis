@@ -1,7 +1,7 @@
 from libc import exit
 
 from test_hashtable import test_hash_fn, test_array, test_item, test_hashtable
-from test_table import test_table_with_many_types
+from test_table import test_table_with_many_types, test_table_delete_items
 from test_protocol import test_parse_ping, test_parse_echo
 from test_string_utils import (
     test_to_upper,
@@ -29,6 +29,7 @@ fn main() raises:
 
     # table
     tests.push_back(test_table_with_many_types)
+    tests.push_back(test_table_delete_items)
 
     # protocol
     tests.push_back(test_parse_ping)
