@@ -72,10 +72,11 @@ struct FiredisParser:
             while self.msg[j] != REDIS_CRLF[0] and self.msg[j + 1] != REDIS_CRLF[1]:
                 j += 1
 
-            let msg_len = atol(self.msg[i:j])
+            let msg_len_str = self.msg[i:j]
+            let msg_len = atol(msg_len_str)
 
+            i += len(msg_len_str)  # skip len chars
             i += 2  # skip REDIS_CRLF chars
-            i += 1  # put i after REDIS_CRLF chars
 
             let msg = self.msg[i : i + msg_len]
             strings.push_back(DodgyString(msg))
@@ -83,7 +84,8 @@ struct FiredisParser:
             i = i + msg_len + 2  # skip msg and REDIS_CRLF chars
 
         if i != self.size:
-            raise Error("could not parse message")
+            let err = "could not parse message, did not parse: " + to_repr(self.msg[i:])
+            raise Error(to_string_ref(err))
 
         let raw_command = strings[0].to_string()
         var args = DynamicVector[DodgyString]()

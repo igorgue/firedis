@@ -2,7 +2,7 @@ from libc import exit
 
 from test_hashtable import test_hash_fn, test_array, test_item, test_hashtable
 from test_table import test_table_with_many_types, test_table_delete_items
-from test_protocol import test_parse_ping, test_parse_echo
+from test_protocol import test_parse_ping, test_parse_echo, test_parse_long_message
 from test_string_utils import (
     test_to_upper,
     test_to_lower,
@@ -34,6 +34,7 @@ fn main() raises:
     # protocol
     tests.push_back(test_parse_ping)
     tests.push_back(test_parse_echo)
+    tests.push_back(test_parse_long_message)
 
     let total_tests = len(tests)
 
