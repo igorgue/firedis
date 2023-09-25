@@ -99,7 +99,14 @@ struct FiredisParser:
         let c = to_upper(command)
 
         if c == "PING":
-            self.result = make_pong()
+            if len(args) == 0:
+                self.result = make_string("PONG")
+                return
+
+            if len(args) > 1:
+                self.result = make_error("wrong number of arguments for 'ping' command")
+
+            self.result = make_msg(REDIS_STRING, args[0].to_string())
         elif c == "ECHO":
             if len(args) > 1:
                 self.result = make_error("wrong number of arguments for 'echo' command")
@@ -230,7 +237,3 @@ fn make_double(msg: Float32) -> String:
 
 fn make_big_integer(msg: Int64) -> String:
     return make_msg(REDIS_BIG_NUMBER, String(msg))
-
-
-fn make_pong() -> String:
-    return make_msg(REDIS_STRING, "PONG")
