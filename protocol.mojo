@@ -4,7 +4,7 @@ from math.limit import isinf
 from libc import c_char
 from libc import c_charptr_to_string, to_char_ptr
 
-from string_utils import to_upper, to_repr
+from string_utils import to_upper, to_repr, to_string_ref
 from table import Table
 from libc import exit
 
@@ -27,18 +27,20 @@ alias REDIS_MAP = "%"
 alias REDIS_SET = "~"
 alias REDIS_PUSHES = "|"
 
-let DATABASE: Table = Table.create()
+# var DATABASE: Table = Table.create()
 
 
 struct FiredisParser:
     var msg: String
     var size: Int
     var result: String
+    var db: Table
 
-    fn __init__(inout self: Self, msg: String):
+    fn __init__(inout self: Self, inout db: Table, msg: String):
         let msg_ptr = to_char_ptr(msg)
 
         self.msg = msg
+        self.db = db
         self.size = len(msg)
         self.result = ""
 
@@ -83,7 +85,7 @@ struct FiredisParser:
         if i != self.size:
             raise Error("could not parse message")
 
-        var command = strings[0].to_string()
+        let command = strings[0].to_string()
         var args = DynamicVector[DodgyString]()
 
         for i in range(1, len(strings)):
@@ -92,19 +94,44 @@ struct FiredisParser:
         self.build_result(command, args)
 
     fn build_result(
-        inout self: Self, inout command: String, inout args: DynamicVector[DodgyString]
+        inout self: Self, command: String, args: DynamicVector[DodgyString]
     ):
-        command = to_upper(command)
+        let c = to_upper(command)
 
-        if command == "PING":
+        if c == "PING":
             self.result = make_pong()
-        elif command == "ECHO":
-            if len(args) == 1:
-                self.result = make_bulk_string(args[0].to_string())
-            else:
+        elif c == "ECHO":
+            if len(args) > 1:
                 self.result = make_error("wrong number of arguments for 'echo' command")
+                return
+
+            self.result = make_bulk_string(args[0].to_string())
+        elif c == "GET":
+            if len(args) > 1:
+                self.result = make_error("wrong number of arguments for 'get' command")
+                return
+
+            let key = to_string_ref(args[0].to_string())
+            var value: StringRef = ""
+
+            if self.db.get(key, value):
+                self.result = make_bulk_string(value)
+            else:
+                self.result = make_null()
+        elif c == "SET":
+            if len(args) != 2:
+                self.result = make_error("wrong number of arguments for 'set' command")
+                return
+
+            let key = to_string_ref(args[0].to_string())
+            let value = to_string_ref(args[1].to_string())
+
+            if self.db.put(key, value):
+                self.result = make_string("OK")
+            else:
+                self.result = make_error("could not set value")
         else:
-            self.result = make_msg(REDIS_ERROR, "unknown command: " + command)
+            self.result = make_msg(REDIS_ERROR, "unknown command: " + c)
 
 
 fn make_msg(header: String, msg: String) -> String:

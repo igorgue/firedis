@@ -4,6 +4,7 @@ from algorithm import parallelize, num_cores
 
 from string_utils import to_repr
 from protocol import FiredisParser, make_string
+from table import Table
 
 from libc import AF_INET, AF_INET6, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, SHUT_RDWR
 from libc import c_char, c_int, c_uint, c_void
@@ -31,8 +32,8 @@ from libc import (
 from config import load_config
 
 
-fn reply_to_message(msg: String) -> String:
-    var parser = FiredisParser(msg)
+fn reply_to_message(inout db: Table, msg: String) -> String:
+    var parser = FiredisParser(db, msg)
 
     try:
         parser.parse()
@@ -42,7 +43,7 @@ fn reply_to_message(msg: String) -> String:
     return parser.result
 
 
-fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
+fn respond_to_client(inout db: Table, new_sockfd: c_int, workers: Int) -> None:
     with Runtime() as rt:
 
         @always_inline
@@ -63,7 +64,7 @@ fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
 
                 print("> received message:", to_repr(msg))
 
-                let reply = reply_to_message(msg)
+                let reply = reply_to_message(db, msg)
                 if send(new_sockfd, to_char_ptr(reply), len(reply), 0) == -1:
                     print("> failed to send reply:", to_repr(reply))
                     break
@@ -73,7 +74,7 @@ fn respond_to_client(new_sockfd: c_int, workers: Int) -> None:
         parallelize[handle_messages](rt, workers)
 
 
-fn wait_for_clients(sockfd: c_int, workers: Int) -> None:
+fn wait_for_clients(inout db: Table, sockfd: c_int, workers: Int) -> None:
     print("> waiting for connections...")
 
     while True:
@@ -95,13 +96,14 @@ fn wait_for_clients(sockfd: c_int, workers: Int) -> None:
                 else:
                     print("> new connection accepted with fd:", new_sockfd)
 
-                respond_to_client(new_sockfd, workers)
+                respond_to_client(db, new_sockfd, workers)
 
             parallelize[handle_client](rt, workers)
 
 
 fn main() -> None:
     let config = load_config()
+    var db = Table.create()
 
     print("> starting firedis at ip addr:", config.host, "port:", config.port, "🔥")
 
@@ -159,6 +161,6 @@ fn main() -> None:
         config.max_clients,
         "max clients",
     )
-    wait_for_clients(sockfd, config.workers)
+    wait_for_clients(db, sockfd, config.workers)
 
     _ = shutdown(sockfd, SHUT_RDWR)

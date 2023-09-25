@@ -120,6 +120,14 @@ struct Table:
         except e:
             return False
 
+    fn get_string(inout self: Self, key: StringRef, inout value: StringRef) -> Bool:
+        try:
+            value = self.strs[key]
+
+            return value != NOT_FOUND_ERROR
+        except e:
+            return False
+
     fn to_string(inout self: Self) raises -> String:
         var res: String = "\n{\n"
 
