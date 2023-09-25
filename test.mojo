@@ -45,8 +45,14 @@ fn main() raises:
     # TODO: figure out how to show the test name
 
     if passed == total_tests:
-        print("\033[0;32mAll tests passed!\033[0;0m 🔥")
+        print("\033[0;32mAll (" + String(total_tests) + ") tests passed!\033[0;0m 🔥")
         exit(0)
     else:
-        print("\033[0;31mSome tests failed!\033[0;0m 🌊")
+        print(
+            "\033[0;31mSome tests failed ("
+            + String(passed)
+            + "/"
+            + String(total_tests)
+            + ")!\033[0;0m 🌊"
+        )
         exit(-1)
