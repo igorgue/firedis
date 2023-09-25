@@ -85,20 +85,20 @@ struct FiredisParser:
         if i != self.size:
             raise Error("could not parse message")
 
-        let command = strings[0].to_string()
+        let raw_command = strings[0].to_string()
         var args = DynamicVector[DodgyString]()
 
         for i in range(1, len(strings)):
             args.push_back(strings[i])
 
-        self.build_result(command, args)
+        self.build_result(raw_command, args)
 
     fn build_result(
-        inout self: Self, command: String, args: DynamicVector[DodgyString]
+        inout self: Self, raw_command: String, args: DynamicVector[DodgyString]
     ):
-        let c = to_upper(command)
+        let command = to_upper(raw_command)
 
-        if c == "PING":
+        if command == "PING":
             if len(args) == 0:
                 self.result = make_string("PONG")
                 return
@@ -107,13 +107,13 @@ struct FiredisParser:
                 self.result = make_error("wrong number of arguments for 'ping' command")
 
             self.result = make_msg(REDIS_STRING, args[0].to_string())
-        elif c == "ECHO":
+        elif command == "ECHO":
             if len(args) > 1:
                 self.result = make_error("wrong number of arguments for 'echo' command")
                 return
 
             self.result = make_bulk_string(args[0].to_string())
-        elif c == "GET":
+        elif command == "GET":
             if len(args) > 1:
                 self.result = make_error("wrong number of arguments for 'get' command")
                 return
@@ -125,7 +125,7 @@ struct FiredisParser:
                 self.result = make_bulk_string(value)
             else:
                 self.result = make_null()
-        elif c == "SET":
+        elif command == "SET":
             if len(args) != 2:
                 self.result = make_error("wrong number of arguments for 'set' command")
                 return
@@ -137,7 +137,7 @@ struct FiredisParser:
                 self.result = make_string("OK")
             else:
                 self.result = make_error("could not set value")
-        elif c == "DEL":
+        elif command == "DEL":
             if len(args) == 0:
                 self.result = make_error("wrong number of arguments for 'del' command")
                 return
@@ -151,7 +151,7 @@ struct FiredisParser:
 
             self.result = make_integer(count)
         else:
-            self.result = make_msg(REDIS_ERROR, "unknown command: " + c)
+            self.result = make_msg(REDIS_ERROR, "unknown command: " + command)
 
 
 fn make_msg(header: String, msg: String) -> String:
