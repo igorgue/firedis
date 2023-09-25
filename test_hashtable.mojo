@@ -127,25 +127,25 @@ fn test_hashtable() raises -> Bool:
     hash_table_int.set("time", 123)
     hash_table_int.set("time2", 456)
 
-    if assert_equal(hash_table_int.table[8][0].value, 123):
+    if assert_equal(hash_table_int.data[8][0].value, 123):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    if assert_equal(hash_table_int.table[8].size, 1):
+    if assert_equal(hash_table_int.data[8].size, 1):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    if assert_equal(hash_table_int.table[8].cap, 2):
+    if assert_equal(hash_table_int.data[8].cap, 2):
         print_no_newline(".")
     else:
         print_no_newline("E")
         return False
 
-    if assert_equal(hash_table_int.table[6][0].value, 456):
+    if assert_equal(hash_table_int.data[6][0].value, 456):
         print_no_newline(".")
     else:
         print_no_newline("E")

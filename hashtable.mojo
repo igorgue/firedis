@@ -1,4 +1,6 @@
 from math import abs
+from time import now
+
 from list_iterator import ListIterator
 
 alias NOT_FOUND_ERROR = "NOT_FOUND"
@@ -20,9 +22,10 @@ fn hash_fn(key: String) -> Int:
 struct Item[T: AnyType]:
     var key: StringRef
     var value: T
+    var expires: Int  # expires in ms
 
     fn __init__(key: StringRef, value: T) -> Self:
-        return Self {key: key, value: value}
+        return Self {key: key, value: value, expires: -1}
 
     fn __eq__(self, other: None) -> Bool:
         return False
@@ -62,6 +65,12 @@ struct Item[T: AnyType]:
 
     fn set_value(inout self: Self, value: T):
         self.value = value
+
+    fn set_expire(inout self: Self, key: StringRef, expire: Int):
+        self.expires = expire
+
+    fn is_expired(self: Self) -> Bool:
+        return self.expires != -1 and self.expires < now()
 
     fn value_to_string(self: Self) raises -> String:
         if T == Bool:
@@ -180,7 +189,7 @@ struct Array[T: AnyType]:
 @register_passable("trivial")
 struct HashTable[T: AnyType]:
     var size: Int
-    var table: Array[Array[Item[T]]]
+    var data: Array[Array[Item[T]]]
     var count: Int
 
     fn __init__(size: Int) raises -> Self:
@@ -189,7 +198,7 @@ struct HashTable[T: AnyType]:
         for i in range(size):
             table[i] = Array[Item[T]](0)
 
-        return Self {size: size, table: table, count: 0}
+        return Self {size: size, data: table, count: 0}
 
     fn hash_function(self, key: StringRef) -> Int:
         return hash_fn(key) % self.size
@@ -197,38 +206,41 @@ struct HashTable[T: AnyType]:
     fn set(inout self: Self, key: StringRef, value: T) raises:
         let hash_index = self.hash_function(key)
 
-        for i in range(self.table[hash_index].size):
-            if self.table[hash_index][i].key == key:
-                self.table[hash_index][i].set_value(value)
+        for i in range(self.data[hash_index].size):
+            if self.data[hash_index][i].key == key:
+                self.data[hash_index][i].set_value(value)
                 return
 
         let item = Item[T](key, value)
 
-        self.table[hash_index].data.store(self.table[hash_index].size, item)
-        self.table[hash_index].resize(self.table[hash_index].size + 1)
+        self.data[hash_index].data.store(self.data[hash_index].size, item)
+        self.data[hash_index].resize(self.data[hash_index].size + 1)
 
         self.count += 1
         if self.count > self.size:
             self.resize()
 
-    fn contains(self: Self, key: StringRef) raises -> Bool:
+    fn contains(self: Self, key: StringRef) -> Bool:
         if self.count == 0:
             return False
 
         let hash_index = self.hash_function(key)
 
-        for i in range(self.table[hash_index].size):
-            if self.table[hash_index][i].key == key:
-                return True
+        try:
+            for i in range(self.data[hash_index].size):
+                if self.data[hash_index][i].key == key:
+                    return True
+        except:
+            pass
 
         return False
 
     fn get(self: Self, key: StringRef) raises -> T:
         let hash_index = self.hash_function(key)
 
-        for i in range(self.table[hash_index].size):
-            if self.table[hash_index][i].key == key:
-                return rebind[T](self.table[hash_index][i].value)
+        for i in range(self.data[hash_index].size):
+            if self.data[hash_index][i].key == key:
+                return rebind[T](self.data[hash_index][i].value)
 
         raise Error(NOT_FOUND_ERROR)
 
@@ -241,10 +253,10 @@ struct HashTable[T: AnyType]:
     fn delete(inout self: Self, key: StringRef) raises -> Bool:
         let hash_index = self.hash_function(key)
 
-        for i in range(self.table[hash_index].size):
-            let item = self.table[hash_index][i]
+        for i in range(self.data[hash_index].size):
+            let item = self.data[hash_index][i]
             if item.key == key:
-                self.table[hash_index].remove_at(i)
+                self.data[hash_index].remove_at(i)
                 self.count -= 1
 
                 return True
@@ -252,9 +264,9 @@ struct HashTable[T: AnyType]:
         return False
 
     fn resize(inout self: Self) raises:
-        let old_table = self.table.data
+        let old_table = self.data.data
         self.size *= 2
-        self.table = Array[Array[Item[T]]](self.size)
+        self.data = Array[Array[Item[T]]](self.size)
         self.count = 0
 
         for i in range(self.size):
@@ -265,6 +277,16 @@ struct HashTable[T: AnyType]:
                     let item = bucket[j]
 
                     self.set(item.key, item.value)
+
+    fn set_expire(inout self: Self, key: StringRef, expires: Int) raises:
+        let hash_index = self.hash_function(key)
+
+        for i in range(self.data[hash_index].size):
+            if self.data[hash_index][i].key == key:
+                self.data[hash_index][i].set_expire(key, expires)
+                return
+
+        raise Error(NOT_FOUND_ERROR)
 
     fn to_string(inout self: Self) raises -> String:
         var res: String = ""
@@ -284,7 +306,7 @@ struct HashTable[T: AnyType]:
         let indent = "  "
 
         for i in range(self.size):
-            let bucket = self.table[i]
+            let bucket = self.data[i]
 
             for j in range(bucket.size):
                 let item = bucket[j]

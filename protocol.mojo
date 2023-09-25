@@ -4,7 +4,7 @@ from math.limit import isinf
 from libc import c_char
 from libc import c_charptr_to_string, to_char_ptr
 
-from string_utils import to_upper, to_repr
+from string_utils import to_upper, to_repr, to_string_ref
 from table import Table
 from libc import exit
 
@@ -126,17 +126,48 @@ struct FiredisParser:
             else:
                 self.result = make_null()
         elif command == "SET":
-            if len(args) != 2:
+            var key: StringRef = ""
+            var value: StringRef = ""
+
+            if len(args) == 2:
+                key = args[0].to_string_ref()
+                value = args[1].to_string_ref()
+
+                if self.db.set(key, value):
+                    self.result = make_string("OK")
+                else:
+                    self.result = make_error("could not set value")
+
+            if len(args) < 2:
                 self.result = make_error("wrong number of arguments for 'set' command")
                 return
 
-            let key = args[0].to_string_ref()
-            let value = args[1].to_string_ref()
+            for i in range(2, len(args), 2):
+                let option_key = to_string_ref(to_upper(args[i].to_string()))
+                let option_value = args[i + 1].to_string_ref()
 
-            if self.db.set(key, value):
-                self.result = make_string("OK")
-            else:
-                self.result = make_error("could not set value")
+                if option_key == "EX":
+                    try:
+                        let ex = atol(option_value)
+                        if self.db.set_ex(key, ex):
+                            self.result = make_string("OK")
+                        else:
+                            self.result = make_error("could not set ex value")
+                            return
+                    except:
+                        self.result = make_error("invalid ex value")
+                        return
+                # elif option_key == "PX":
+                #     let px = atol(option_value)
+                #     self.db.set_px(px)
+                # elif option_key == "NX":
+                #     self.db.set_nx()
+                # elif option_key == "XX":
+                #     self.db.set_xx()
+                # else:
+                #     self.result = make_error("unknown option: " + option_key)
+                #     return
+
         elif command == "DEL":
             if len(args) == 0:
                 self.result = make_error("wrong number of arguments for 'del' command")

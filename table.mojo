@@ -1,3 +1,5 @@
+from time import now
+
 from hashtable import HashTable, NOT_FOUND_ERROR
 from libc import exit
 
@@ -147,6 +149,27 @@ struct Table:
 
     fn count(self: Self) -> Int:
         return self.bools.count + self.ints.count + self.floats.count + self.strs.count
+
+    fn set_ex(inout self: Self, key: StringRef, value: Int) -> Bool:
+        """Set expires in seconds."""
+
+        try:
+            if self.bools.contains(key):
+                self.bools.set_expire(key, value)
+            elif self.ints.contains(key):
+                self.ints.set_expire(key, value)
+            elif self.floats.contains(key):
+                self.floats.set_expire(key, value)
+            elif self.strs.contains(key):
+                self.strs.set_expire(key, value)
+            else:
+                print("> error setting expire:", value)
+                return False
+
+            return True
+        except e:
+            print("> error setting expires:", e.value)
+            return False
 
     fn to_string(inout self: Self) raises -> String:
         var res: String = "\n{\n"
