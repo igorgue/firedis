@@ -142,6 +142,9 @@ struct Table:
             or self.strs.delete(key)
         )
 
+    fn count(self: Self) -> Int:
+        return self.bools.count + self.ints.count + self.floats.count + self.strs.count
+
     fn to_string(inout self: Self) raises -> String:
         var res: String = "\n{\n"
 
@@ -157,9 +160,6 @@ struct Table:
         res += "}"
 
         return res
-
-    fn count(self: Self) -> Int:
-        return self.bools.count + self.ints.count + self.floats.count + self.strs.count
 
     fn print(inout self: Self) raises:
         print(self.to_string())

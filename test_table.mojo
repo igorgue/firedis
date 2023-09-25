@@ -99,6 +99,12 @@ fn test_table_delete_items() raises -> Bool:
 
     _ = table.delete("a")
 
+    if assert_equal(table.bools.count, 3):
+        print_no_newline(".")
+    else:
+        print_no_newline("E")
+        return False
+
     if assert_equal(table.count(), 3):
         print_no_newline(".")
     else:
