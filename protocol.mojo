@@ -74,7 +74,7 @@ struct FiredisParser:
             let msg = self.msg[i : i + msg_len]
             strings.push_back(DodgyString(msg))
 
-            i = i + msg_len + 2
+            i = i + msg_len + 2  # skip msg and REDIS_CRLF chars
 
         if i != self.size:
             raise Error("could not parse message")
