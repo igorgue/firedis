@@ -137,6 +137,19 @@ struct FiredisParser:
                 self.result = make_string("OK")
             else:
                 self.result = make_error("could not set value")
+        elif c == "DEL":
+            if len(args) == 0:
+                self.result = make_error("wrong number of arguments for 'del' command")
+                return
+
+            var count = 0
+            for i in range(len(args)):
+                let key = to_string_ref(args[i].to_string())
+
+                if self.db.delete(key):
+                    count += 1
+
+            self.result = make_integer(count)
         else:
             self.result = make_msg(REDIS_ERROR, "unknown command: " + c)
 

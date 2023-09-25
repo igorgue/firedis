@@ -134,13 +134,16 @@ struct Table:
         except e:
             return False
 
-    fn delete(inout self: Self, key: StringRef) raises -> Bool:
-        return (
-            self.bools.delete(key)
-            or self.ints.delete(key)
-            or self.floats.delete(key)
-            or self.strs.delete(key)
-        )
+    fn delete(inout self: Self, key: StringRef) -> Bool:
+        try:
+            return (
+                self.bools.delete(key)
+                or self.ints.delete(key)
+                or self.floats.delete(key)
+                or self.strs.delete(key)
+            )
+        except:
+            return False
 
     fn count(self: Self) -> Int:
         return self.bools.count + self.ints.count + self.floats.count + self.strs.count
