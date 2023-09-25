@@ -5,6 +5,8 @@ from libc import c_char
 from libc import c_charptr_to_string, to_char_ptr
 
 from string_utils import to_upper, to_repr
+from table import Table
+from libc import exit
 
 from dodgy import DodgyString
 
@@ -24,6 +26,8 @@ alias REDIS_VERBATIM_STRING = "="
 alias REDIS_MAP = "%"
 alias REDIS_SET = "~"
 alias REDIS_PUSHES = "|"
+
+let DATABASE: Table = Table.create()
 
 
 struct FiredisParser:

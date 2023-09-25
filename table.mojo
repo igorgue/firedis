@@ -1,4 +1,5 @@
 from hashtable import HashTable
+from libc import exit
 
 alias INIT_SIZE: Int = 100
 
@@ -134,6 +135,20 @@ struct Table:
         res += "}"
 
         return res
+
+    @staticmethod
+    fn create() -> Table:
+        let table: Table
+
+        try:
+            table = Table()
+        except e:
+            print("> fatal error: could not init table")
+            exit(-1)
+
+            pass
+
+        return table
 
     fn print(inout self: Self) raises:
         print(self.to_string())
