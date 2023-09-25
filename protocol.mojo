@@ -133,7 +133,7 @@ struct FiredisParser:
             let key = to_string_ref(args[0].to_string())
             let value = to_string_ref(args[1].to_string())
 
-            if self.db.put(key, value):
+            if self.db.set(key, value):
                 self.result = make_string("OK")
             else:
                 self.result = make_error("could not set value")

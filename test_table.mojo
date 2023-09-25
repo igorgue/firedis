@@ -6,25 +6,25 @@ from testing import assert_equal, assert_not_equal, assert_true, assert_false
 fn test_table_with_many_types() raises -> Bool:
     var table = Table()
 
-    if not table.put("a", True):
+    if not table.set("a", True):
         print_no_newline("E")
         return False
     else:
         print_no_newline(".")
 
-    if not table.put("b", 2):
+    if not table.set("b", 2):
         print_no_newline("E")
         return False
     else:
         print_no_newline(".")
 
-    if not table.put("c", 3.3):
+    if not table.set("c", 3.3):
         print_no_newline("E")
         return False
     else:
         print_no_newline(".")
 
-    if not table.put("d", "4"):
+    if not table.set("d", "4"):
         print_no_newline("E")
         return False
     else:

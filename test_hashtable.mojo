@@ -124,8 +124,8 @@ fn test_hashtable() raises -> Bool:
 
     hash_table_int = HashTable[Int](10)
 
-    hash_table_int.put("time", 123)
-    hash_table_int.put("time2", 456)
+    hash_table_int.set("time", 123)
+    hash_table_int.set("time2", 456)
 
     if assert_equal(hash_table_int.table[8][0].value, 123):
         print_no_newline(".")

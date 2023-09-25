@@ -204,7 +204,7 @@ struct HashTable[T: AnyType]:
     fn hash_function(self, key: StringRef) -> Int:
         return hash_fn(key) % self.size
 
-    fn put(inout self: Self, key: StringRef, value: T) raises:
+    fn set(inout self: Self, key: StringRef, value: T) raises:
         let hash_index = self.hash_function(key)
 
         for i in range(self.table[hash_index].size):
@@ -246,7 +246,7 @@ struct HashTable[T: AnyType]:
         return self.get(key)
 
     fn __setitem__(inout self: Self, key: StringRef, value: T) raises:
-        self.put(key, value)
+        self.set(key, value)
 
     fn delete(inout self: Self, key: StringRef) raises:
         let hash_index = self.hash_function(key)
@@ -272,7 +272,7 @@ struct HashTable[T: AnyType]:
                 for j in range(bucket.size):
                     let item = bucket[j]
 
-                    self.put(item.key, item.value)
+                    self.set(item.key, item.value)
 
     fn to_string(inout self: Self) raises -> String:
         var res: String = ""

@@ -28,7 +28,7 @@ struct Table:
             strs: HashTable[StringRef](size),
         }
 
-    fn put(inout self: Self, key: StringRef, value: Bool) -> Bool:
+    fn set(inout self: Self, key: StringRef, value: Bool) -> Bool:
         try:
             if self.ints.contains(key):
                 return False
@@ -43,7 +43,7 @@ struct Table:
         except e:
             return False
 
-    fn put(inout self: Self, key: StringRef, value: Int) -> Bool:
+    fn set(inout self: Self, key: StringRef, value: Int) -> Bool:
         try:
             if self.bools.contains(key):
                 return False
@@ -58,7 +58,7 @@ struct Table:
         except e:
             return False
 
-    fn put(inout self: Self, key: StringRef, value: Float32) -> Bool:
+    fn set(inout self: Self, key: StringRef, value: Float32) -> Bool:
         try:
             if self.bools.contains(key):
                 return False
@@ -73,7 +73,7 @@ struct Table:
         except e:
             return False
 
-    fn put(inout self: Self, key: StringRef, value: StringRef) -> Bool:
+    fn set(inout self: Self, key: StringRef, value: StringRef) -> Bool:
         try:
             if self.bools.contains(key):
                 return False
