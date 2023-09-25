@@ -41,29 +41,6 @@ struct FiredisParser:
     fn __repr__(inout self: Self) -> String:
         return to_repr(self.msg)
 
-    fn print_msg_debug(inout self: Self):
-        print("> msg:", self.__repr__())
-
-    fn print_msg_debug(inout self: Self, i: Int):
-        print("")
-        print(self.__repr__())
-
-        # print_no_newline("i:", i)
-        # print_no_newline(" =>", self.msg[i])
-
-        for j in range(i + 1):
-            if self.msg[j] == "\r":
-                print_no_newline(" ")
-            elif self.msg[j] == "\n":
-                print_no_newline(" ")
-            if self.msg[j] == self.msg[i]:
-                print_no_newline("^:", i, '=> "')
-                print_no_newline(self.msg[i])
-                print('"')
-                break
-
-            print_no_newline(" ")
-
     fn parse(inout self: Self) raises:
         var i = 1  # skip REDIS_ARRAY char
 
