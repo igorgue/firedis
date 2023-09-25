@@ -42,11 +42,6 @@ struct Item[T: AnyType]:
     fn __eq__(self, other: Item[StringRef]) -> Bool:
         return self.key == other.key and rebind[StringRef](self.value) == other.value
 
-    # fn __eq__(self, other: Item[String]) -> Bool:
-    #     return self.key == other.key and rebind[StringRef](self.value) == StringRef(
-    #         other.value, len(other.value)
-    #     )
-
     fn __ne__(self, other: None) -> Bool:
         return True
 
@@ -65,9 +60,6 @@ struct Item[T: AnyType]:
     fn __ne__(self, other: Item[StringRef]) -> Bool:
         return self.__eq__(other) == False
 
-    # fn __ne__(self, other: Item[String]) -> Bool:
-    #     return self.__eq__(other) == False
-
     fn set_value(inout self: Self, value: T):
         self.value = value
 
@@ -81,8 +73,6 @@ struct Item[T: AnyType]:
         elif T == Int:
             return String(rebind[Int](self.value))
         elif T == StringRef:
-            return '"' + String(rebind[StringRef](self.value)) + '"'
-        elif T == String:
             return '"' + String(rebind[StringRef](self.value)) + '"'
         else:
             return "???"
