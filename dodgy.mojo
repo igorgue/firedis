@@ -70,7 +70,7 @@ struct DodgyString:
     fn to_string_ref(self) -> StringRef:
         let ptr = Pointer[Int8]().alloc(self.size)
 
-        memcpy(ptr, self.data.bitcast[Int8](), self.size)
+        memcpy(ptr, self.data, self.size)
 
         return StringRef(
             ptr.bitcast[__mlir_type.`!pop.scalar<si8>`]().address, self.size
