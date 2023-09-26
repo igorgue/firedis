@@ -2,14 +2,14 @@ MOJO = mojo
 
 .PHONY: firedis
 firedis:
-	@echo "Building firedis in release mode"
+	@echo "[release mode]"
 	mojo build firedis.🔥
 	@mkdir -p bin
 	mv firedis bin/firedis
 
 .PHONY: firedis.debug
 firedis.debug:
-	@echo "Building firedis in debug mode"
+	@echo "[debug mode]"
 	mojo build --debug-level "full" firedis.🔥
 	@mkdir -p bin
 	mv firedis bin/firedis
