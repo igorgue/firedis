@@ -3,7 +3,7 @@ from runtime.llcl import Runtime
 from algorithm import parallelize, num_cores
 
 from string_utils import to_repr
-from protocol import FiredisParser, make_string
+from protocol import FiredisParser
 from table import Table
 
 from libc import AF_INET, AF_INET6, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, SHUT_RDWR
@@ -15,7 +15,7 @@ from libc import (
     exit,
     htons,
     # inet_ntoa,
-    inet_ntop,
+    # inet_ntop,
     inet_pton,
     listen,
     recv,
@@ -26,7 +26,6 @@ from libc import (
     sockaddr_in,
     socket,
     socklen_t,
-    strlen,
     to_char_ptr,
 )
 

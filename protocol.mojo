@@ -2,13 +2,9 @@ from math import isnan
 from math.limit import isinf
 from time import now
 
-from libc import c_char
-from libc import c_charptr_to_string, to_char_ptr
-
 from string_utils import to_upper, to_repr, to_string_ref
 from hashtable import Item
 from table import Table
-from libc import exit
 
 from dodgy import DodgyString
 
@@ -41,8 +37,6 @@ struct FiredisParser:
     var db: Table
 
     fn __init__(inout self: Self, inout db: Table, msg: String):
-        let msg_ptr = to_char_ptr(msg)
-
         self.msg = msg
         self.db = db
         self.size = len(msg)

@@ -1,8 +1,5 @@
 from list_iterator import ListIterator
-from libc import strlen
 from memory import memcpy
-
-from string_utils import to_string_ref
 
 
 @value
