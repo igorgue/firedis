@@ -61,6 +61,7 @@ struct FiredisClient:
 
         if connect(sockfd, ai_ptr, sizeof[sockaddr_in]()) == -1:
             _ = shutdown(sockfd, SHUT_RDWR)
+            return False
 
         return True
 
