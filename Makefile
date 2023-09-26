@@ -1,5 +1,6 @@
 MOJO = mojo
 
+.PHONY: firedis
 firedis:
 	mojo build firedis.🔥
 	@mkdir -p bin
