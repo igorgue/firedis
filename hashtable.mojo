@@ -223,8 +223,10 @@ struct HashTable[T: AnyType]:
             self.resize()
 
     fn contains(self: Self, key: StringRef) -> Bool:
-        if self.count == 0:
-            return False
+        # XXX: This doesn't work for some reason...
+        # but count should be 1 and it's 0
+        # if self.count == 0:
+        #     return False
 
         let hash_index = self.hash_function(key)
 
@@ -237,13 +239,13 @@ struct HashTable[T: AnyType]:
 
         return False
 
-    fn get_item(self: Self, key: StringRef) raises -> Item[T]:
+    @always_inline
+    fn get_item(inout self: Self, key: StringRef) raises -> Item[T]:
         let hash_index = self.hash_function(key)
 
         for i in range(self.data[hash_index].size):
             if self.data[hash_index][i].key == key:
-                if T == Bool:
-                    return self.data[hash_index][i]
+                return self.data[hash_index][i]
 
         raise Error(NOT_FOUND_ERROR)
 
@@ -279,7 +281,6 @@ struct HashTable[T: AnyType]:
         let old_table = self.data.data
         self.size *= 2
         self.data = Array[Array[Item[T]]](self.size)
-        self.count = 0
 
         for i in range(self.size):
             let bucket = old_table[i]

@@ -105,7 +105,9 @@ struct Table:
         except e:
             return False
 
-    fn get_item(self: Self, key: StringRef, inout value: Item[Int]) raises -> Bool:
+    fn get_item(
+        inout self: Self, key: StringRef, inout value: Item[Int]
+    ) raises -> Bool:
         if self.ints.contains(key):
             value = self.ints.get_item(key)
 
@@ -113,7 +115,9 @@ struct Table:
 
         return False
 
-    fn get_item(self: Self, key: StringRef, inout value: Item[Bool]) raises -> Bool:
+    fn get_item(
+        inout self: Self, key: StringRef, inout value: Item[Bool]
+    ) raises -> Bool:
         if self.bools.contains(key):
             value = self.bools.get_item(key)
 
@@ -122,7 +126,7 @@ struct Table:
         return False
 
     fn get_item(
-        self: Self, key: StringRef, inout value: Item[StringRef]
+        inout self: Self, key: StringRef, inout value: Item[StringRef]
     ) raises -> Bool:
         if self.strs.contains(key):
             value = self.strs.get_item(key)
@@ -131,7 +135,9 @@ struct Table:
 
         return False
 
-    fn get_item(self: Self, key: StringRef, inout value: Item[Float32]) raises -> Bool:
+    fn get_item(
+        inout self: Self, key: StringRef, inout value: Item[Float32]
+    ) raises -> Bool:
         if self.floats.contains(key):
             value = self.floats.get_item(key)
 
@@ -193,13 +199,13 @@ struct Table:
 
         try:
             if self.bools.contains(key):
-                self.bools.set_expire(key, value)
+                self.bools.set_expire(key, expire)
             elif self.ints.contains(key):
-                self.ints.set_expire(key, value)
+                self.ints.set_expire(key, expire)
             elif self.floats.contains(key):
-                self.floats.set_expire(key, value)
+                self.floats.set_expire(key, expire)
             elif self.strs.contains(key):
-                self.strs.set_expire(key, value)
+                self.strs.set_expire(key, expire)
             else:
                 return False
 

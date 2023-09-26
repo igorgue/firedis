@@ -127,15 +127,19 @@ struct FiredisParser:
                 self.result = make_null()
                 return
 
-            var item: Item[StringRef] = Item[StringRef]("null", "null")
             try:
-                _ = self.db.get_item(key, item)
+                var item: Item[StringRef] = Item[StringRef]("null", "null")
+
+                if not self.db.get_item(key, item):
+                    self.result = make_null()
+                    return
+
                 let now_ms = now() // 1_000_000
 
                 if item.expire == -1:
                     self.result = make_bulk_string(value)
                     return
-                elif item.expire < now_ms:
+                elif item.is_expired():
                     self.result = make_null()
                     return
                 else:
