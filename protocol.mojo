@@ -1,10 +1,12 @@
 from math import isnan
 from math.limit import isinf
+from time import now
 
 from libc import c_char
 from libc import c_charptr_to_string, to_char_ptr
 
 from string_utils import to_upper, to_repr, to_string_ref
+from hashtable import Item
 from table import Table
 from libc import exit
 
@@ -26,8 +28,6 @@ alias REDIS_VERBATIM_STRING = "="
 alias REDIS_MAP = "%"
 alias REDIS_SET = "~"
 alias REDIS_PUSHES = "|"
-
-# var DATABASE: Table = Table.create()
 
 
 struct FiredisParser:
@@ -123,10 +123,27 @@ struct FiredisParser:
             let key = args[0].to_string_ref()
             var value: StringRef = ""
 
-            if self.db.get(key, value):
-                self.result = make_bulk_string(value)
-            else:
+            if not self.db.get(key, value):
                 self.result = make_null()
+                return
+
+            var item: Item[StringRef] = Item[StringRef]("null", "null")
+            try:
+                _ = self.db.get_item(key, item)
+                let now_ms = now() // 1_000_000
+
+                if item.expire == -1:
+                    self.result = make_bulk_string(value)
+                    return
+                elif item.expire < now_ms:
+                    self.result = make_null()
+                    return
+                else:
+                    self.result = make_bulk_string(value)
+                    return
+            except:
+                self.result = make_error("could not get item")
+                return
         elif command == "SET":
             var key: StringRef = ""
             var value: StringRef = ""

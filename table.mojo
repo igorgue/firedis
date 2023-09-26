@@ -1,6 +1,7 @@
 from time import now
 
-from hashtable import HashTable, NOT_FOUND_ERROR
+from hashtable import HashTable, Item
+from hashtable import NOT_FOUND_ERROR
 from libc import exit
 
 alias INIT_SIZE: Int = 100
@@ -104,6 +105,40 @@ struct Table:
         except e:
             return False
 
+    fn get_item(self: Self, key: StringRef, inout value: Item[Int]) raises -> Bool:
+        if self.ints.contains(key):
+            value = self.ints.get_item(key)
+
+            return True
+
+        return False
+
+    fn get_item(self: Self, key: StringRef, inout value: Item[Bool]) raises -> Bool:
+        if self.bools.contains(key):
+            value = self.bools.get_item(key)
+
+            return True
+
+        return False
+
+    fn get_item(
+        self: Self, key: StringRef, inout value: Item[StringRef]
+    ) raises -> Bool:
+        if self.strs.contains(key):
+            value = self.strs.get_item(key)
+
+            return True
+
+        return False
+
+    fn get_item(self: Self, key: StringRef, inout value: Item[Float32]) raises -> Bool:
+        if self.floats.contains(key):
+            value = self.floats.get_item(key)
+
+            return True
+
+        return False
+
     fn get(inout self: Self, key: StringRef, inout value: Bool) -> Bool:
         try:
             value = self.bools[key]
@@ -132,6 +167,8 @@ struct Table:
         try:
             value = self.strs[key]
 
+            # NOTE: This is due a bug in the compiler,
+            # an exception is returned as a value of the function.
             return value != NOT_FOUND_ERROR
         except e:
             return False

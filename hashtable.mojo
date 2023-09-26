@@ -3,7 +3,7 @@ from time import now
 
 from list_iterator import ListIterator
 
-alias NOT_FOUND_ERROR = "NOT_FOUND"
+alias NOT_FOUND_ERROR = "Key not found"
 
 
 @always_inline
@@ -236,6 +236,16 @@ struct HashTable[T: AnyType]:
             pass
 
         return False
+
+    fn get_item(self: Self, key: StringRef) raises -> Item[T]:
+        let hash_index = self.hash_function(key)
+
+        for i in range(self.data[hash_index].size):
+            if self.data[hash_index][i].key == key:
+                if T == Bool:
+                    return self.data[hash_index][i]
+
+        raise Error(NOT_FOUND_ERROR)
 
     fn get(self: Self, key: StringRef) raises -> T:
         let hash_index = self.hash_function(key)
