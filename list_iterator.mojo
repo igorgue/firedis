@@ -1,4 +1,8 @@
 struct ListIterator[T: AnyType]:
+    """
+    To use in a for loop, you need to implement `__iter__`.
+    """
+
     var storage: Pointer[T]
     var offset: Int
     var max: Int

@@ -31,6 +31,10 @@ alias REDIS_PUSHES = "|"
 
 
 struct FiredisParser:
+    """
+    FiredisParser parses a redis message.
+    """
+
     var msg: String
     var size: Int
     var result: String
@@ -179,7 +183,8 @@ struct FiredisParser:
                         else:
                             self.result = make_error("could not set ex value")
                             return
-                    except:
+                    except e:
+                        print("> error: ", e.value)
                         self.result = make_error("invalid ex value")
                         return
                 if option_key == "PX":

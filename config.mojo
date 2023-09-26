@@ -12,6 +12,10 @@ alias FIREDIS_HOST = "0.0.0.0"
 
 
 struct FiredisConfig:
+    """
+    Firedis configuration struct.
+    """
+
     var max_clients: Int
     var core_multiplier: Int
     var workers: Int
