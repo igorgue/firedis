@@ -1,0 +1,2 @@
+struct FiredisClient:
+    pass
