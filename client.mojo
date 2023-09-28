@@ -1,14 +1,16 @@
 from libc import c_void, c_uint, c_char
 from libc import AF_INET, SOCK_STREAM, SHUT_RDWR
 from libc import (
-    inet_pton,
-    to_char_ptr,
-    htons,
-    sockaddr_in,
-    sockaddr,
-    socket,
     connect,
+    htons,
+    inet_pton,
+    send,
     shutdown,
+    sockaddr,
+    sockaddr_in,
+    socket,
+    strlen,
+    to_char_ptr,
 )
 
 
@@ -65,11 +67,25 @@ struct FiredisClient:
 
         return True
 
+    fn send(inout self, data: String) -> Bool:
+        let data_ptr = to_char_ptr(data)
+        let data_len = strlen(data_ptr)
+
+        let sent = send(self.sockfd, data_ptr, data_len, 0)
+        if sent == -1:
+            return False
+
+        return True
+
 
 fn main():
     var client = FiredisClient()
 
     if client.connect():
         print("> connected")
+
+        if client.send("*1\r\n$4\r\nPING\r\n"):
+            print("> sent")
+            # TODO: receive response
     else:
         print("> connection failed")
